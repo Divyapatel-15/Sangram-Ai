@@ -9,47 +9,60 @@ shared timeline, and receive a single synthesized final answer.
 > no API keys exist in this repo. The UI states this plainly as
 > `Demo Mode · Simulated responses`.
 
-## Stack
+## Project Structure
 
-- React 18 + Vite 5 (no other runtime dependencies)
-- CSS design-token system (`src/styles/global.css`) + one application sheet
-- Fonts: Space Grotesk / Inter / JetBrains Mono
+All frontend application files are consolidated under the `frontend/` directory:
 
-## Run
+```text
+sangram-ai/
+├── frontend/                     # Complete Vite + React frontend application
+│   ├── src/
+│   │   ├── components/           # UI components (Navbar, Landing, Arena, Config, etc.)
+│   │   ├── data/                 # Model roster & cognitive archetypes
+│   │   ├── services/             # Deterministic engine, stream runner, history, share
+│   │   ├── styles/               # Design tokens (global.css)
+│   │   ├── App.jsx               # Main state machine
+│   │   ├── App.css               # Component & motion styles
+│   │   └── main.jsx              # React DOM entry
+│   ├── public/                   # Static assets (logo, favicon)
+│   ├── index.html                # Entry HTML
+│   ├── vite.config.js            # Vite configuration
+│   └── package.json              # Frontend dependencies
+├── docs/                         # Backend contracts & architecture documentation
+└── package.json                  # Root workspace runner scripts
+```
+
+## Run Locally
+
+You can run commands from the **repo root**:
 
 ```bash
+# Install frontend dependencies
+npm --prefix frontend install
+
+# Start local dev server (http://localhost:5173 or 3000)
+npm run dev
+
+# Build production bundle (outputs to frontend/dist/)
+npm run build
+
+# Preview build
+npm run preview
+```
+
+Or directly inside the `frontend/` folder:
+
+```bash
+cd frontend
 npm install
-npm run dev      # http://localhost:5173
-npm run build    # production bundle in dist/
-npm run preview  # serve the build
-```
-
-## Architecture map
-
-```
-src/
-  data/models.js            shared model catalog + per-model accent tokens (single source)
-  services/
-    battleService.js        deterministic battle generator (content only, no timers)
-    streamRunner.js         single pacing/timer engine for progressive reveal
-    historyStore.js         localStorage demo-session archive (validated, capped)
-    shareLink.js            compact #demo= links (question + 2 model ids only)
-  components/               Navbar, Landing, Config, Arena, Timeline,
-                            Results, CompletedDebate, History, ErrorStates, Icons
-  App.jsx                   view orchestration + state ownership
-docs/
-  BACKEND_CONTRACT.md       streaming/error/share contract a real API must fulfil
-  CREDITS.md                future user-wise credit system design (not implemented)
+npm run dev
 ```
 
 ## Branding
 
-Official logo currently available: `public/sangram-logo.png` (640×640, dark
-navy field, cyan arena mark) — used for the nav mark and favicon. A vector
-SVG source of the official mark is **not in the repo**; `Icons.jsx` keeps a
-clearly-marked temporary hex glyph as fallback, ready to be replaced via
-`OFFICIAL_LOGO_SRC`.
+Official logo currently available: `frontend/public/sangram-logo.png` (640×640, dark
+navy field, cyan arena mark) — used for the nav mark and favicon.
 
 ## Product journey
 
-**SELECT MODELS → ENTER QUESTION → WATCH THE DEBATE → SYNTHESIZE → ONE FINAL ANSWER**
+**SELECT MODELS & PERSONAS → ENTER QUESTION → WATCH THE DEBATE → SYNTHESIZE → ONE FINAL ANSWER**
