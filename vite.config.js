@@ -5,19 +5,17 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: '0.0.0.0',
-    port: 5173,
+    port: 3000,
     strictPort: true,
     cors: true,
     allowedHosts: true,
     headers: {
       'X-Frame-Options': 'ALLOWALL'
     },
-    hmr: {
-      host: 'localhost'
-    }
+    hmr: false
   },
   preview: {
     host: '0.0.0.0',
-    port: 5173
+    port: 3000
   }
 })

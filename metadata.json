@@ -1,0 +1,8 @@
+{
+  "name": "SANGRAM AI — Different Minds. One Arena.",
+  "description": "SANGRAM AI is a multi-model debate arena: pick two AI model profiles, put one question to both, watch them argue across four rounds in a shared timeline, and receive a single synthesized final answer. Frontend prototype with simulated responses.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
