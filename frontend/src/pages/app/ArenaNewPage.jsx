@@ -5,8 +5,6 @@ import { archetypes } from '../../data/archetypes';
 import { useToast } from '../../context/ToastContext';
 import { mockBattleService } from '../../services/mock/mockBattleService';
 import { Button } from '../../components/common/Button';
-import { Card } from '../../components/common/Card';
-import { Input, Textarea } from '../../components/common/Input';
 
 export const ArenaNewPage = () => {
   const [modelA, setModelA] = useState('chatgpt');
@@ -14,7 +12,7 @@ export const ArenaNewPage = () => {
   const [archetypeA, setArchetypeA] = useState('first_principles');
   const [archetypeB, setArchetypeB] = useState('devils_advocate');
   const [prompt, setPrompt] = useState('Microservices vs Modular Monolith for an early-stage B2B SaaS startup?');
-  const [context, setContext] = useState('Team size: 6 engineers. Goal: Rapid MVP deployment with scalable domain boundaries.');
+  const [context, setContext] = useState('');
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
@@ -23,25 +21,22 @@ export const ArenaNewPage = () => {
   const samplePrompts = [
     {
       label: 'Microservices vs Monolith',
-      q: 'Microservices vs Modular Monolith for an early-stage B2B SaaS startup?',
-      ctx: 'Team size: 6 engineers. Goal: Rapid MVP deployment with scalable domain boundaries.'
+      q: 'Microservices vs Modular Monolith for an early-stage B2B SaaS startup?'
     },
     {
       label: 'PostgreSQL vs Vector DB',
-      q: 'Should our startup start with pgvector in Postgres or provision a managed Pinecone cluster?',
-      ctx: 'Under 5M document vectors, high relational query dependency.'
+      q: 'Should our startup start with pgvector in Postgres or provision a managed Pinecone cluster?'
     },
     {
       label: 'Python vs Rust for AI',
-      q: 'Python vs Rust for high-throughput LLM streaming inference pipelines?',
-      ctx: 'Need sub-20ms p99 token latency with high concurrent web traffic.'
+      q: 'Python vs Rust for high-throughput LLM streaming inference pipelines?'
     }
   ];
 
   const handleStartBattle = async (e) => {
     e.preventDefault();
     if (!prompt.trim()) {
-      showToast('Please enter a question or topic for the arena.', 'warn');
+      showToast('Please enter a question or dilemma for the arena.', 'warn');
       return;
     }
     if (modelA === modelB) {
@@ -68,161 +63,153 @@ export const ArenaNewPage = () => {
     }
   };
 
-  const getModelObj = (id) => models.find(m => m.id === id);
-
   return (
     <div className="arena-new-page-view">
       <div className="arena-setup-header">
-        <div className="setup-title-group">
-          <span className="setup-badge">⚡ CHAMBER CONFIGURATION</span>
-          <h1 className="setup-main-title">Deploy Dialectic Combatants</h1>
-          <p className="setup-sub-text">
-            Configure two distinct AI model profiles, assign cognitive lenses, and submit your dilemma.
-          </p>
-        </div>
+        <h1 className="setup-title">Deploy Dialectic Combatants</h1>
+        <p className="setup-sub">
+          Select two distinct model architectures, set their cognitive lenses, and pose your technical or strategic dilemma.
+        </p>
       </div>
 
-      <form onSubmit={handleStartBattle} className="arena-setup-form">
-        {/* Combatant Selection Stage */}
-        <div className="combatants-matchup-stage">
-          {/* Fighter A Slot */}
-          <div className="fighter-slot-card slot-left">
-            <div className="slot-badge">Combatant 01 (Thesis)</div>
-            <div className="slot-selector">
-              <label className="slot-label">Select Model Architecture</label>
-              <select
-                className="select-model-dropdown"
-                value={modelA}
-                onChange={(e) => setModelA(e.target.value)}
-              >
-                {models.map(m => (
-                  <option key={m.id} value={m.id} disabled={m.id === modelB}>
-                    {m.name} ({m.provider} · {m.modelLabel})
-                  </option>
-                ))}
-              </select>
-            </div>
+      <form onSubmit={handleStartBattle} className="arena-setup-form mt-6">
+        {/* Step 1: The Dilemma Input */}
+        <div className="setup-card">
+          <label className="field-label" htmlFor="prompt-input">
+            1. What question or dilemma should the models debate?
+          </label>
+          <textarea
+            id="prompt-input"
+            className="clean-textarea"
+            rows="3"
+            placeholder="E.g., Microservices vs Modular Monolith for an early-stage startup?"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            required
+          />
 
-            <div className="slot-selector mt-4">
-              <label className="slot-label">Cognitive Lens / Archetype</label>
-              <select
-                className="select-model-dropdown"
-                value={archetypeA}
-                onChange={(e) => setArchetypeA(e.target.value)}
-              >
-                {archetypes.map(a => (
-                  <option key={a.id} value={a.id}>{a.name}</option>
-                ))}
-              </select>
-            </div>
-
-            {getModelObj(modelA) && (
-              <div className="slot-model-preview mt-4">
-                <span className="dot" style={{ backgroundColor: getModelObj(modelA).accent.color }}></span>
-                <span className="desc">{getModelObj(modelA).desc}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Central VS Badge */}
-          <div className="clash-vs-divider">
-            <div className="vs-circle">VS</div>
-            <div className="vs-line"></div>
-          </div>
-
-          {/* Fighter B Slot */}
-          <div className="fighter-slot-card slot-right">
-            <div className="slot-badge">Combatant 02 (Challenger)</div>
-            <div className="slot-selector">
-              <label className="slot-label">Select Model Architecture</label>
-              <select
-                className="select-model-dropdown"
-                value={modelB}
-                onChange={(e) => setModelB(e.target.value)}
-              >
-                {models.map(m => (
-                  <option key={m.id} value={m.id} disabled={m.id === modelA}>
-                    {m.name} ({m.provider} · {m.modelLabel})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="slot-selector mt-4">
-              <label className="slot-label">Cognitive Lens / Archetype</label>
-              <select
-                className="select-model-dropdown"
-                value={archetypeB}
-                onChange={(e) => setArchetypeB(e.target.value)}
-              >
-                {archetypes.map(a => (
-                  <option key={a.id} value={a.id}>{a.name}</option>
-                ))}
-              </select>
-            </div>
-
-            {getModelObj(modelB) && (
-              <div className="slot-model-preview mt-4">
-                <span className="dot" style={{ backgroundColor: getModelObj(modelB).accent.color }}></span>
-                <span className="desc">{getModelObj(modelB).desc}</span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Question & Context Input Card */}
-        <Card className="question-input-card mt-8">
-          <div className="quick-presets-row">
-            <span className="preset-label">Quick Prompts:</span>
-            {samplePrompts.map((p, idx) => (
+          <div className="quick-prompts-row mt-2">
+            <span className="quick-prompts-label">Try sample:</span>
+            {samplePrompts.map((sp) => (
               <button
-                key={idx}
+                key={sp.label}
                 type="button"
-                className="preset-pill-btn"
-                onClick={() => {
-                  setPrompt(p.q);
-                  setContext(p.ctx);
-                }}
+                className="sample-prompt-chip"
+                onClick={() => setPrompt(sp.q)}
               >
-                {p.label}
+                {sp.label}
               </button>
             ))}
           </div>
+        </div>
 
-          <div className="mt-4">
-            <Textarea
-              label="The Core Question / Dilemma"
-              rows={3}
-              placeholder="What question or architectural dispute should the models confront?"
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              required
-            />
-          </div>
+        {/* Step 2: The Two Combatants */}
+        <div className="setup-card mt-6">
+          <label className="field-label">2. Select Combatants & Perspectives</label>
 
-          <div className="mt-4">
-            <Textarea
-              label="System Context & Constraints (Optional)"
-              rows={2}
-              placeholder="E.g. team size, traffic constraints, compliance requirements, latency targets..."
-              value={context}
-              onChange={(e) => setContext(e.target.value)}
-            />
-          </div>
+          <div className="combatants-split-grid mt-3">
+            {/* Combatant A */}
+            <div className="combatant-box">
+              <span className="box-badge-label">Combatant 01 · Thesis</span>
+              <div className="input-group mt-2">
+                <label className="select-sublabel">Model</label>
+                <select
+                  className="clean-select"
+                  value={modelA}
+                  onChange={(e) => setModelA(e.target.value)}
+                >
+                  {models.map((m) => (
+                    <option key={m.id} value={m.id} disabled={m.id === modelB}>
+                      {m.name} ({m.provider})
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-          <div className="submit-battle-row mt-6">
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              className="w-full start-arena-btn"
-              loading={loading}
-              icon="⚔"
-            >
-              Start Battle in War Room
-            </Button>
+              <div className="input-group mt-3">
+                <label className="select-sublabel">Cognitive Perspective</label>
+                <select
+                  className="clean-select"
+                  value={archetypeA}
+                  onChange={(e) => setArchetypeA(e.target.value)}
+                >
+                  {archetypes.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.name} — {a.lens}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="combatant-vs-divider">
+              <span className="vs-tag">VS</span>
+            </div>
+
+            {/* Combatant B */}
+            <div className="combatant-box">
+              <span className="box-badge-label">Combatant 02 · Counter-Examiner</span>
+              <div className="input-group mt-2">
+                <label className="select-sublabel">Model</label>
+                <select
+                  className="clean-select"
+                  value={modelB}
+                  onChange={(e) => setModelB(e.target.value)}
+                >
+                  {models.map((m) => (
+                    <option key={m.id} value={m.id} disabled={m.id === modelA}>
+                      {m.name} ({m.provider})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="input-group mt-3">
+                <label className="select-sublabel">Cognitive Perspective</label>
+                <select
+                  className="clean-select"
+                  value={archetypeB}
+                  onChange={(e) => setArchetypeB(e.target.value)}
+                >
+                  {archetypes.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.name} — {a.lens}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
-        </Card>
+        </div>
+
+        {/* Step 3: Optional Constraints */}
+        <div className="setup-card mt-6">
+          <label className="field-label" htmlFor="context-input">
+            3. Context or Constraints <span className="text-muted text-xs">(optional)</span>
+          </label>
+          <input
+            id="context-input"
+            type="text"
+            className="clean-input mt-2"
+            placeholder="E.g., Team size: 5 engineers, 2-year runway, strict latency SLAs."
+            value={context}
+            onChange={(e) => setContext(e.target.value)}
+          />
+        </div>
+
+        {/* Action Button */}
+        <div className="setup-action-row mt-6">
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            className="w-full launch-battle-btn"
+            loading={loading}
+            icon="⚔"
+          >
+            Launch Dialectic Battle
+          </Button>
+        </div>
       </form>
     </div>
   );

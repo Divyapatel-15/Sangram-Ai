@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { mockBattleService } from '../../services/mock/mockBattleService';
-import { mockSavedService } from '../../services/mock/mockSavedService';
 import { mockBattlesList } from '../../data/mockBattles';
+import { mockSavedService } from '../../services/mock/mockSavedService';
 import { useToast } from '../../context/ToastContext';
 import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
-import { Badge } from '../../components/common/Badge';
 
 export const WarRoomPage = () => {
   const [selectedBattleId, setSelectedBattleId] = useState(mockBattlesList[0].id);
@@ -29,292 +27,177 @@ export const WarRoomPage = () => {
       title: `${battle.title} (ADR)`,
       question: battle.title,
       verdict: battle.summary,
-      modelsUsed: ['Claude 3.5 Sonnet', 'GPT-5', 'Gemini 2.5 Pro']
+      modelsUsed: ['Claude 3.5 Sonnet', 'GPT-4o', 'Gemini 2.5 Pro']
     });
     setSaved(true);
     showToast('Saved to your Architectural Decision Records (ADRs)!', 'success');
   };
 
+  const debateRounds = [
+    {
+      round: 1,
+      title: 'Initial Claims (Thesis)',
+      speaker: 'Claude 3.5 Sonnet',
+      role: 'Thesis Author',
+      provider: 'Anthropic',
+      color: '#00D9FF',
+      text: 'A Modular Monolith is the strictly superior choice for an early-stage startup. Incurring network latency, distributed transactions, and Docker orchestration overhead across 6 engineers burns valuable runway before product-market fit is established.'
+    },
+    {
+      round: 2,
+      title: 'Cross-Examination (Antithesis)',
+      speaker: 'ChatGPT (GPT-4o)',
+      role: 'Cross-Examiner',
+      provider: 'OpenAI',
+      color: '#34D399',
+      text: 'While monolithic simplicity is real, modular codebases quickly suffer from leaky boundaries and coupled database schemas unless enforced by hard process. If two engineers write overlapping queries to the same table, you will end up with an unmaintainable distributed monolith.'
+    },
+    {
+      round: 3,
+      title: 'Empirical Defense & Synthesis Lensing',
+      speaker: 'Gemini 2.5 Pro',
+      role: 'Empirical Arbiter',
+      provider: 'Google',
+      color: '#5B9DFF',
+      text: 'Empirical data from 400+ SaaS startups shows that compile-time linting (e.g. nx or ts-project-references) enforces 95% of schema isolation with 0 network operations. Only 4% of startups ever require separate microservice deployments before reaching 50 engineers.'
+    }
+  ];
+
   return (
     <div className="war-room-view">
-      {/* Sticky Stage Navigation & Controls Ribbon */}
-      <section className="war-room-ribbon">
-        <div className="ribbon-inner">
-          <div className="ribbon-left">
-            <div className="ribbon-status-pill">
-              <span className={`status-pulse-dot ${isPaused ? 'paused' : 'live'}`}></span>
-              <span className="status-label-text">
-                {isPaused ? 'DEBATE PAUSED' : 'LIVE DIALECTIC'}
-              </span>
-            </div>
-            <span className="ribbon-separator">/</span>
-            <h2 className="ribbon-heading">
-              WAR ROOM DEBATE · {battle.title}
-            </h2>
+      {/* 1. Clean Stage Ribbon */}
+      <div className="war-room-header-bar">
+        <div className="header-bar-left">
+          <div className="status-indicator-pill">
+            <span className={`live-dot ${isPaused ? 'paused' : ''}`}></span>
+            <span>{isPaused ? 'DEBATE PAUSED' : 'LIVE DIALECTIC'}</span>
           </div>
-
-          {/* Timeline Stages */}
-          <nav className="ribbon-stages-nav" aria-label="Debate progression">
-            <button
-              type="button"
-              className={`stage-pill-btn ${currentRound === 1 ? 'active' : currentRound > 1 ? 'completed' : ''}`}
-              onClick={() => setCurrentRound(1)}
-            >
-              <span>{currentRound > 1 ? '✓' : '1.'}</span>
-              <span>Initial Claims</span>
-            </button>
-            <span className="stage-arrow">→</span>
-            <button
-              type="button"
-              className={`stage-pill-btn ${currentRound === 2 ? 'active' : currentRound > 2 ? 'completed' : ''}`}
-              onClick={() => setCurrentRound(2)}
-            >
-              <span>{currentRound > 2 ? '✓' : '2.'}</span>
-              <span>Cross-Examine</span>
-            </button>
-            <span className="stage-arrow">→</span>
-            <button
-              type="button"
-              className={`stage-pill-btn ${currentRound === 3 ? 'active' : currentRound > 3 ? 'completed' : ''}`}
-              onClick={() => setCurrentRound(3)}
-            >
-              <span>{currentRound > 3 ? '✓' : '3.'}</span>
-              <span>Defend & Revise</span>
-            </button>
-            <span className="stage-arrow">→</span>
-            <button
-              type="button"
-              className={`stage-pill-btn stage-verdict ${currentRound === 4 ? 'active' : ''}`}
-              onClick={() => setCurrentRound(4)}
-            >
-              <span>⚡</span>
-              <span>Verdict</span>
-            </button>
-          </nav>
-
-          {/* Controls */}
-          <div className="ribbon-controls">
-            <button
-              type="button"
-              className="ctrl-btn"
-              onClick={() => setIsPaused(!isPaused)}
-            >
-              {isPaused ? '▶ Resume' : '⏸ Pause'}
-            </button>
-            <button
-              type="button"
-              className="ctrl-btn-primary"
-              onClick={() => setCurrentRound(4)}
-            >
-              ⚡ Skip to Verdict
-            </button>
-          </div>
+          <h1 className="war-room-heading">{battle.title}</h1>
         </div>
-      </section>
 
-      {/* Battle Switcher Bar */}
-      <div className="war-room-switcher-bar mb-6">
-        <span className="switcher-label">Active Chamber Session:</span>
-        <div className="switcher-pills">
-          {mockBattlesList.map((b) => (
-            <button
-              key={b.id}
-              type="button"
-              className={`switcher-pill-btn ${selectedBattleId === b.id ? 'active' : ''}`}
-              onClick={() => {
-                setSelectedBattleId(b.id);
-                setSaved(false);
-              }}
-            >
-              {b.topic}: {b.title.split('for')[0]}
-            </button>
-          ))}
+        {/* 4 Clean Stages */}
+        <div className="stage-nav-pillbox">
+          <button
+            type="button"
+            className={`stage-step-btn ${currentRound === 1 ? 'active' : currentRound > 1 ? 'done' : ''}`}
+            onClick={() => setCurrentRound(1)}
+          >
+            {currentRound > 1 ? '✓' : '1.'} Claims
+          </button>
+          <span className="step-arrow">→</span>
+          <button
+            type="button"
+            className={`stage-step-btn ${currentRound === 2 ? 'active' : currentRound > 2 ? 'done' : ''}`}
+            onClick={() => setCurrentRound(2)}
+          >
+            {currentRound > 2 ? '✓' : '2.'} Cross-Examine
+          </button>
+          <span className="step-arrow">→</span>
+          <button
+            type="button"
+            className={`stage-step-btn ${currentRound === 3 ? 'active' : currentRound > 3 ? 'done' : ''}`}
+            onClick={() => setCurrentRound(3)}
+          >
+            {currentRound > 3 ? '✓' : '3.'} Defense
+          </button>
+          <span className="step-arrow">→</span>
+          <button
+            type="button"
+            className={`stage-step-btn stage-verdict-btn ${currentRound === 4 ? 'active' : ''}`}
+            onClick={() => setCurrentRound(4)}
+          >
+            ⚡ Verdict
+          </button>
+        </div>
+
+        {/* Header Actions */}
+        <div className="header-bar-actions">
+          <button
+            type="button"
+            className="ctrl-action-btn"
+            onClick={() => setIsPaused(!isPaused)}
+          >
+            {isPaused ? '▶ Resume' : '❚❚ Pause'}
+          </button>
+          <Link to="/app/arena">
+            <Button variant="primary" size="sm" icon="⚔">
+              New Arena Battle
+            </Button>
+          </Link>
         </div>
       </div>
 
-      {/* Main Dialectic Workspace Grid */}
-      <div className="war-room-grid">
-        {/* Left Column (8 cols): Topology Canvas + Debate Stream */}
-        <div className="war-room-left-col">
-          {/* Active Dialectic Topology Canvas */}
-          <section className="topology-card">
-            <div className="topology-header">
-              <div className="topology-title-row">
-                <span className="hub-icon">🕸</span>
-                <span className="topology-title">Active Dialectic Topology Constellation</span>
-              </div>
-              <div className="topology-meta">
-                <span className="live-dot-green"></span>
-                <span>Dynamic Graph · 3 Clashes Resolved</span>
-              </div>
-            </div>
+      {/* 2. Focused Main Layout: Debate Stream on Left, Synthesis on Right */}
+      <div className="war-room-content-grid mt-6">
+        {/* Left: Connected Debate Stream */}
+        <div className="debate-stream-column">
+          <div className="column-title-bar">
+            <h3 className="column-title">Dialectic Combat Progression</h3>
+            <span className="text-muted text-xs">Round {currentRound} of 4</span>
+          </div>
 
-            {/* Dynamic Interactive SVG Constellation */}
-            <div className="constellation-canvas">
-              <svg className="constellation-svg" viewBox="0 0 740 200" fill="none">
-                <line x1="80" y1="100" x2="660" y2="100" stroke="#203954" strokeDasharray="3 3" opacity="0.4" />
-                <line x1="260" y1="30" x2="480" y2="170" stroke="#203954" strokeDasharray="3 3" opacity="0.3" />
-
-                {/* Attack Vector: Claude -> ChatGPT */}
-                <path
-                  d="M 170 85 C 230 40, 310 40, 370 85"
-                  stroke="#00D9FF"
-                  strokeWidth="2.5"
-                  strokeDasharray="6 4"
-                  className="animate-pulse"
-                />
-                {/* Secondary Vector: Gemini -> ChatGPT */}
-                <path
-                  d="M 570 85 C 510 40, 430 40, 370 85"
-                  stroke="#4388FF"
-                  strokeWidth="1.5"
-                  opacity="0.7"
-                />
-
-                <circle cx="270" cy="57" r="4" fill="#00D9FF" />
-                <circle cx="470" cy="57" r="4" fill="#4388FF" />
-              </svg>
-
-              {/* Active Vector Floating Tag */}
-              <div className="active-vector-badge">
-                <span className="vector-pulse"></span>
-                <span className="vector-label">Active Vector:</span>
-                <span className="vector-text">Claude challenging GPT-5 on distributed ops complexity</span>
-              </div>
-
-              {/* Model Node 1: Claude */}
-              <div className="node-marker node-left">
-                <div className="node-avatar bg-claude">C</div>
-                <span className="node-name">Claude Sonnet 4.5</span>
-                <span className="node-score">9.4 pts · Aggressor</span>
-              </div>
-
-              {/* Model Node 2: ChatGPT */}
-              <div className="node-marker node-center">
-                <div className="node-avatar bg-gpt">G</div>
-                <span className="node-name">ChatGPT GPT-5</span>
-                <span className="node-score">8.8 pts · Defending</span>
-              </div>
-
-              {/* Model Node 3: Gemini */}
-              <div className="node-marker node-right">
-                <div className="node-avatar bg-gemini">✦</div>
-                <span className="node-name">Gemini 2.5 Pro</span>
-                <span className="node-score">8.2 pts · Synthesizer</span>
-              </div>
-            </div>
-          </section>
-
-          {/* Shared Debate Timeline Stream */}
-          <section className="debate-stream-section mt-6">
-            <h3 className="stream-section-title">Dialectic Transcript & Exchange</h3>
-
-            {/* Round 1: Claims */}
-            <div className={`debate-exchange-card ${currentRound >= 1 ? 'revealed' : 'dimmed'}`}>
-              <div className="exchange-header">
-                <span className="exchange-round-tag">ROUND 1 · INITIAL THESES</span>
-              </div>
-              <div className="speech-entry speech-gpt">
-                <div className="speaker-label">
-                  <span className="dot dot-gpt"></span>
-                  <strong>ChatGPT</strong> (GPT-5 · First Principles)
+          <div className="debate-rounds-stack">
+            {debateRounds.slice(0, currentRound).map((r) => (
+              <div key={r.round} className="debate-round-box">
+                <div className="round-box-header">
+                  <div className="speaker-identity">
+                    <span className="speaker-color-dot" style={{ backgroundColor: r.color }}></span>
+                    <span className="speaker-name">{r.speaker}</span>
+                    <span className="speaker-role-tag">{r.role}</span>
+                  </div>
+                  <span className="round-number-tag">Round 0{r.round}</span>
                 </div>
-                <p>
-                  "For a B2B SaaS architecture, establishing bounded contexts via microservices prevents monolithic code rot. Team members can develop, test, and release services in isolation without blocking on monolith deployment queues."
-                </p>
+                <p className="round-speech-text">{r.text}</p>
               </div>
-            </div>
-
-            {/* Round 2: Cross-Examination */}
-            <div className={`debate-exchange-card ${currentRound >= 2 ? 'revealed' : 'dimmed'}`}>
-              <div className="exchange-header">
-                <span className="exchange-round-tag">ROUND 2 · CROSS-EXAMINATION & CHALLENGE</span>
-              </div>
-              <div className="speech-entry speech-claude">
-                <div className="speaker-label">
-                  <span className="dot dot-claude"></span>
-                  <strong>Claude</strong> (Sonnet 4.5 · Devil’s Advocate)
-                </div>
-                <p>
-                  "That proposition assumes an enterprise engineering force with dedicated platform operations. A 6-person engineering team running microservices faces massive cross-cutting overhead: distributed tracing, dual-write synchronization, gRPC schema churn, and latency cascades. You gain modularity but lose the company to operational paralysis."
-                </p>
-              </div>
-            </div>
-
-            {/* Round 3: Defense & Revision */}
-            <div className={`debate-exchange-card ${currentRound >= 3 ? 'revealed' : 'dimmed'}`}>
-              <div className="exchange-header">
-                <span className="exchange-round-tag">ROUND 3 · REVISION & CONCESSION</span>
-              </div>
-              <div className="speech-entry speech-gpt">
-                <div className="speaker-label">
-                  <span className="dot dot-gpt"></span>
-                  <strong>ChatGPT</strong> (Concession & Refinement)
-                </div>
-                <p>
-                  "Conceded on team size constraints. A Modular Monolith—where module boundaries are enforced at compile-time via strict internal package structures without network serialization—yields 90% of the architectural discipline with 0% of the distributed networking tax."
-                </p>
-              </div>
-            </div>
-          </section>
+            ))}
+          </div>
         </div>
 
-        {/* Right Column (4 cols): Consolidated Synthesis & Actions */}
-        <div className="war-room-right-col">
-          <Card className="synthesis-panel-card">
-            <div className="panel-top">
-              <span className="panel-badge">CONSENSUS VERDICT</span>
-              <div className="score-pill">
-                <span className="score-number">{battle.consensusScore || 94}%</span>
-                <span className="score-sub">Confidence</span>
+        {/* Right: Synthesis Panel & ADR Action */}
+        <div className="synthesis-column">
+          <div className="synthesis-verdict-card">
+            <div className="verdict-card-top">
+              <span className="verdict-tag">CONSOLIDATED SYNTHESIS</span>
+              <div className="consensus-meter">
+                <span className="consensus-num">94%</span>
+                <span className="consensus-sub">Consensus</span>
               </div>
             </div>
 
             <h3 className="verdict-card-title">Dialectic Recommendation</h3>
 
-            <div className="verdict-prose-box">
+            <div className="verdict-text-box">
               <p>
-                <strong>Consolidated Architecture Decision:</strong> Adopt a <strong>Modular Monolith</strong> as the foundational pattern.
+                <strong>Consolidated Decision:</strong> Adopt a <strong>Modular Monolith</strong>. Enforce domain boundaries via linter rules rather than network boundaries. Maintain shared deployment velocity until individual service traffic diverges by 10x.
               </p>
-              <ul className="verdict-bullet-list">
-                <li>Enforce module boundaries strictly via linting/compiler rules rather than network boundaries.</li>
-                <li>Maintain a unified PostgreSQL schema with isolated tables per module.</li>
-                <li>Extract microservices only when an isolated workload demands distinct hardware or when multiple squad deployments collide continuously.</li>
-              </ul>
             </div>
 
-            <div className="key-tensions-box">
-              <span className="tensions-title">Unresolved Trade-offs:</span>
-              <div className="tension-tag-pill">
-                Blast radius of shared database vs operational simplicity
+            <div className="tensions-box">
+              <span className="tensions-label">Key Tensions Resolved:</span>
+              <div className="tensions-tag-row">
+                <span className="clean-tension-tag">Deployment Tax vs. Boundary Discipline</span>
+                <span className="clean-tension-tag">Schema Migration Simplicity</span>
               </div>
             </div>
 
-            <div className="verdict-actions-stack">
+            <div className="verdict-actions-row">
               <Button
                 variant="primary"
-                className="w-full"
-                onClick={handleCopyVerdict}
-              >
-                📋 Copy ADR Verdict
-              </Button>
-
-              <Button
-                variant="secondary"
                 className="w-full"
                 onClick={handleSaveToADR}
                 disabled={saved}
               >
-                {saved ? '✓ Saved to Workspace' : '💾 Save as ADR Record'}
+                {saved ? '✓ Saved to ADR Records' : '💾 Save as ADR Record'}
               </Button>
-
-              <Link to="/app/arena" className="w-full block">
-                <Button variant="outline" className="w-full">
-                  ⚔ Deploy Custom Battle in Arena
-                </Button>
-              </Link>
+              <Button
+                variant="outline"
+                className="w-full mt-2"
+                onClick={handleCopyVerdict}
+              >
+                📋 Copy Verdict Text
+              </Button>
             </div>
-          </Card>
+          </div>
         </div>
       </div>
     </div>

@@ -7,7 +7,6 @@ import { Logo } from '../components/common/Logo';
 export const DashboardLayout = () => {
   const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -16,36 +15,47 @@ export const DashboardLayout = () => {
     navigate('/auth/login');
   };
 
-  // Generate breadcrumb text from current path
   const getBreadcrumb = () => {
     const parts = location.pathname.split('/').filter(Boolean);
     if (parts.length <= 1) return 'Workspace / Dashboard';
     const sub = parts[1];
     switch (sub) {
-      case 'war-room':
-        return 'Chamber / Live War Room';
       case 'arena':
-        return 'Combat / AI Arena';
+        return 'Chamber / AI Arena';
+      case 'war-room':
+        return 'Chamber / War Room';
       case 'history':
         return 'Workspace / Battle History';
       case 'saved':
         return 'Workspace / Saved Answers';
       case 'models':
-        return 'Library / Model Catalog';
+        return 'Library / Model Matrix';
       case 'usage':
-        return 'Analytics / Token Usage';
+        return 'Telemetry / Token Usage';
       case 'billing':
-        return 'Billing / Subscription & Plans';
+        return 'Account / Billing & Plans';
       case 'settings':
-        return 'Settings / Account & Preferences';
+        return 'Account / Settings';
       default:
         return 'Workspace / Dashboard';
     }
   };
 
+  const navItems = [
+    { label: 'AI Arena', path: '/app/arena', icon: '⚔' },
+    { label: 'War Room', path: '/app/war-room', icon: '⚡' },
+    { label: 'Dashboard', path: '/app', icon: '⊞', end: true },
+    { label: 'Battle History', path: '/app/history', icon: '📜' },
+    { label: 'Saved Answers', path: '/app/saved', icon: '💾' },
+    { label: 'Model Library', path: '/app/models', icon: '🧠' },
+    { label: 'Token Usage', path: '/app/usage', icon: '📊' },
+    { label: 'Billing & Plans', path: '/app/billing', icon: '💳' },
+    { label: 'Settings', path: '/app/settings/profile', icon: '⚙' }
+  ];
+
   return (
     <div className="dashboard-shell">
-      {/* Mobile Drawer Overlay */}
+      {/* Mobile Backdrop */}
       {sidebarOpen && (
         <div
           className="dashboard-mobile-backdrop"
@@ -54,13 +64,14 @@ export const DashboardLayout = () => {
         />
       )}
 
-      {/* Left Sidebar */}
+      {/* Modern Compact Sidebar */}
       <aside className={`dashboard-sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
         <div className="sidebar-inner">
-          {/* Brand Header */}
+          {/* Header Brand */}
           <div className="sidebar-brand">
-            <Logo size="md" href="/home" />
+            <Logo size="sm" href="/app" />
             <button
+              type="button"
               className="sidebar-close-btn"
               onClick={() => setSidebarOpen(false)}
               aria-label="Close sidebar"
@@ -69,143 +80,59 @@ export const DashboardLayout = () => {
             </button>
           </div>
 
-          {/* New Battle Quick Action */}
+          {/* Primary Action */}
           <div className="sidebar-cta-block">
             <Link to="/app/arena" onClick={() => setSidebarOpen(false)} className="w-full">
               <Button variant="primary" className="new-battle-btn w-full" icon="⚔">
                 New Battle
               </Button>
             </Link>
-            <div className="sidebar-search">
-              <span className="search-icon">🔍</span>
-              <input
-                type="text"
-                placeholder="Search battles & models..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-input"
-              />
-            </div>
           </div>
 
-          {/* Navigation Items */}
+          {/* Navigation Links */}
           <div className="sidebar-scrollable">
-            <div className="nav-group">
-              <span className="nav-group-title">Arena Chamber</span>
-              <nav className="sidebar-nav">
+            <nav className="sidebar-nav" aria-label="Application navigation">
+              {navItems.map((item) => (
                 <NavLink
-                  to="/app/war-room"
+                  key={item.path}
+                  to={item.path}
+                  end={item.end}
                   onClick={() => setSidebarOpen(false)}
                   className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
                 >
-                  <span className="link-icon">⚔</span>
-                  <span className="link-text">War Room</span>
-                  <span className="link-badge-live">LIVE</span>
+                  <span className="sidebar-nav-icon" aria-hidden="true">{item.icon}</span>
+                  <span className="sidebar-nav-label">{item.label}</span>
                 </NavLink>
+              ))}
+            </nav>
 
-                <NavLink
-                  to="/app/arena"
-                  onClick={() => setSidebarOpen(false)}
-                  className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-                >
-                  <span className="link-icon">⚡</span>
-                  <span className="link-text">AI Arena</span>
-                </NavLink>
-
-                <NavLink
-                  to="/app"
-                  end
-                  onClick={() => setSidebarOpen(false)}
-                  className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-                >
-                  <span className="link-icon">📊</span>
-                  <span className="link-text">Dashboard</span>
-                </NavLink>
-
-                <NavLink
-                  to="/app/history"
-                  onClick={() => setSidebarOpen(false)}
-                  className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-                >
-                  <span className="link-icon">📜</span>
-                  <span className="link-text">Battle History</span>
-                </NavLink>
-
-                <NavLink
-                  to="/app/saved"
-                  onClick={() => setSidebarOpen(false)}
-                  className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-                >
-                  <span className="link-icon">💾</span>
-                  <span className="link-text">Saved Answers</span>
-                </NavLink>
-              </nav>
-            </div>
-
-            <div className="nav-group">
-              <span className="nav-group-title">Intelligence & Tools</span>
-              <nav className="sidebar-nav">
-                <NavLink
-                  to="/app/models"
-                  onClick={() => setSidebarOpen(false)}
-                  className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-                >
-                  <span className="link-icon">🧠</span>
-                  <span className="link-text">Model Library</span>
-                  <span className="link-count">6</span>
-                </NavLink>
-
-                <NavLink
-                  to="/app/usage"
-                  onClick={() => setSidebarOpen(false)}
-                  className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-                >
-                  <span className="link-icon">📈</span>
-                  <span className="link-text">User Tokens</span>
-                </NavLink>
-
-                <NavLink
-                  to="/app/billing"
-                  onClick={() => setSidebarOpen(false)}
-                  className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-                >
-                  <span className="link-icon">💳</span>
-                  <span className="link-text">Billing Plans</span>
-                </NavLink>
-
-                <NavLink
-                  to="/app/settings/profile"
-                  onClick={() => setSidebarOpen(false)}
-                  className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-                >
-                  <span className="link-icon">⚙</span>
-                  <span className="link-text">Settings</span>
-                </NavLink>
-              </nav>
-            </div>
-
-            {/* Quick Public Links */}
             <div className="sidebar-marketing-link">
               <Link to="/home" className="external-portal-btn">
-                <span>🌐 View Public Website</span>
-                <span className="arrow-portal">↗</span>
+                <span>← Public Website</span>
+                <span className="portal-arrow">↗</span>
               </Link>
             </div>
           </div>
 
-          {/* User Profile Card */}
+          {/* User Profile Bar */}
           <div className="sidebar-user-card">
             <div className="user-info-row">
               <div className="user-avatar-circle">
-                {user?.name ? user.name.charAt(0) : 'U'}
+                {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
               </div>
               <div className="user-meta">
-                <span className="user-name">{user?.name || 'Explorer'}</span>
-                <span className="user-tier">Pro Member</span>
+                <span className="user-name">{user?.name || 'Alex Vance'}</span>
+                <span className="user-tier">Pro Dialectic Tier</span>
               </div>
             </div>
-            <button className="logout-btn" onClick={handleLogout} title="Log out">
-              🚪
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="logout-btn"
+              title="Sign Out"
+              aria-label="Sign Out"
+            >
+              ⎋
             </button>
           </div>
         </div>
@@ -213,40 +140,37 @@ export const DashboardLayout = () => {
 
       {/* Main Content Viewport */}
       <div className="dashboard-main-wrapper">
-        {/* Top Header */}
+        {/* Sticky Top Bar */}
         <header className="dashboard-topbar">
           <div className="topbar-left">
             <button
+              type="button"
               className="topbar-hamburger"
               onClick={() => setSidebarOpen(true)}
-              aria-label="Open sidebar menu"
+              aria-label="Open navigation menu"
             >
               ☰
             </button>
-            <div className="topbar-breadcrumbs">
-              <span className="crumb-segment">{getBreadcrumb()}</span>
-            </div>
+            <span className="crumb-segment">{getBreadcrumb()}</span>
           </div>
 
           <div className="topbar-right">
             <div className="dialectic-status-pill">
               <span className="status-live-dot"></span>
-              <span className="status-text">Dialectic Engine Ready</span>
+              <span>Dialectic Engine Online</span>
             </div>
-
-            <Link to="/pricing" className="upgrade-pill-btn">
-              ⚡ Upgrade Plan
+            <Link to="/app/billing" className="upgrade-pill-btn">
+              ⚡ Pro Tier
             </Link>
-
-            <Link to="/app/settings/profile" className="topbar-avatar" title="Account settings">
+            <Link to="/app/settings/profile" className="topbar-avatar" title="Settings">
               <div className="avatar-img-circle">
-                {user?.name ? user.name.charAt(0) : 'A'}
+                {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
               </div>
             </Link>
           </div>
         </header>
 
-        {/* Dynamic Nested Route Content */}
+        {/* Dynamic Route Content */}
         <main className="dashboard-content-area">
           <Outlet />
         </main>

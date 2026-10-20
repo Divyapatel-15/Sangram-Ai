@@ -3,9 +3,6 @@ import { Link } from 'react-router-dom';
 import { mockSavedService } from '../../services/mock/mockSavedService';
 import { useToast } from '../../context/ToastContext';
 import { Button } from '../../components/common/Button';
-import { Card } from '../../components/common/Card';
-import { Input } from '../../components/common/Input';
-import { EmptyState } from '../../components/common/EmptyState';
 
 export const SavedAnswersPage = () => {
   const [savedItems, setSavedItems] = useState([]);
@@ -50,46 +47,45 @@ export const SavedAnswersPage = () => {
       </div>
 
       <div className="search-bar-wrap mt-6">
-        <Input
-          placeholder="Filter saved ADR records..."
+        <input
+          type="text"
+          className="clean-input"
+          placeholder="Filter saved ADR records by keyword or topic..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
 
-      <div className="saved-grid mt-6">
+      <div className="saved-clean-list mt-6">
         {filtered.length === 0 ? (
-          <EmptyState
-            icon="💾"
-            title="No Saved Answers"
-            description="You haven't bookmarked any consensus verdicts yet. In any arena debate, click 'Save as ADR Record'."
-            actionText="Go to Arena"
-            onAction={() => window.location.href = '/app/arena/new'}
-          />
+          <div className="empty-panel text-center py-8">
+            <p className="text-muted">No saved answers yet. In any arena debate, click 'Save as ADR Record'.</p>
+          </div>
         ) : (
           filtered.map((item) => (
-            <Card key={item.id} className="saved-full-card">
-              <div className="saved-card-header">
+            <div key={item.id} className="saved-item-box">
+              <div className="saved-box-header">
                 <div>
-                  <h3 className="saved-card-title">{item.title}</h3>
-                  <p className="saved-card-question">"{item.question}"</p>
+                  <h3 className="saved-item-title">{item.title}</h3>
+                  <p className="saved-item-q">"{item.question}"</p>
                 </div>
                 <button
                   type="button"
-                  className="remove-saved-btn"
+                  className="remove-cross-btn"
                   onClick={() => handleRemove(item.id)}
                   title="Remove from saved"
+                  aria-label="Remove from saved"
                 >
                   ✕
                 </button>
               </div>
 
-              <div className="saved-card-body">
-                <pre className="verdict-pre-wrap">{item.verdict}</pre>
+              <div className="saved-box-verdict">
+                <p>{item.verdict}</p>
               </div>
 
-              <div className="saved-card-footer">
-                <span className="models-used-tag">
+              <div className="saved-box-footer">
+                <span className="models-mini-tag">
                   Models: {item.modelsUsed?.join(', ')}
                 </span>
                 <div className="saved-footer-actions">
@@ -103,7 +99,7 @@ export const SavedAnswersPage = () => {
                   </Link>
                 </div>
               </div>
-            </Card>
+            </div>
           ))
         )}
       </div>

@@ -3,22 +3,15 @@ import { Link } from 'react-router-dom';
 import { mockBillingService } from '../../services/mock/mockBillingService';
 import { useToast } from '../../context/ToastContext';
 import { Button } from '../../components/common/Button';
-import { Card } from '../../components/common/Card';
-import { Badge } from '../../components/common/Badge';
 
 export const BillingPage = () => {
   const [invoices, setInvoices] = useState([]);
-  const [paymentMethods, setPaymentMethods] = useState([]);
   const { showToast } = useToast();
 
   useEffect(() => {
     const load = async () => {
-      const [inv, pm] = await Promise.all([
-        mockBillingService.getInvoices(),
-        mockBillingService.getPaymentMethods()
-      ]);
+      const inv = await mockBillingService.getInvoices();
       setInvoices(inv);
-      setPaymentMethods(pm);
     };
     load();
   }, []);
@@ -32,12 +25,9 @@ export const BillingPage = () => {
       <div className="page-header-row">
         <div>
           <h1 className="page-title">Billing & Subscriptions</h1>
-          <p className="page-sub">Manage your plan, payment methods, and invoice records.</p>
+          <p className="page-sub">Manage your plan, payment methods, and invoice history.</p>
         </div>
         <div className="flex gap-2">
-          <Link to="/app/billing/manage">
-            <Button variant="outline">Payment Methods</Button>
-          </Link>
           <Link to="/pricing">
             <Button variant="primary">Change Plan</Button>
           </Link>
@@ -45,16 +35,16 @@ export const BillingPage = () => {
       </div>
 
       {/* Current Plan Overview Card */}
-      <Card className="current-plan-card mt-6">
+      <div className="current-plan-box mt-6">
         <div className="plan-header-row">
           <div>
-            <Badge variant="cyan" size="sm">ACTIVE SUBSCRIPTION</Badge>
-            <h2 className="plan-name-huge mt-2">Pro Dialectic Tier</h2>
-            <p className="plan-cadence-desc">
+            <span className="clean-tag-active">ACTIVE SUBSCRIPTION</span>
+            <h2 className="plan-title-lg mt-2">Pro Dialectic Tier</h2>
+            <p className="plan-sub-text">
               $29.00 / month · Renews on November 01, 2026 via Mastercard •••• 4242
             </p>
           </div>
-          <div className="plan-quick-actions">
+          <div className="plan-upgrade-action">
             <Link to="/checkout?plan=power&interval=monthly">
               <Button variant="primary" icon="⚡">
                 Upgrade to Power Tier
@@ -63,64 +53,62 @@ export const BillingPage = () => {
           </div>
         </div>
 
-        <div className="plan-features-summary mt-6">
-          <div className="summary-item">
-            <span className="bullet">✓</span>
-            <span>All 6 Frontier Model Profiles in Arena</span>
+        <div className="plan-features-grid mt-6">
+          <div className="feat-check-item">
+            <span className="check-icon">✓</span>
+            <span>All 6 Frontier Model Architectures in Arena</span>
           </div>
-          <div className="summary-item">
-            <span className="bullet">✓</span>
+          <div className="feat-check-item">
+            <span className="check-icon">✓</span>
             <span>Full 4-Round Cross-Examination & Synthesis</span>
           </div>
-          <div className="summary-item">
-            <span className="bullet">✓</span>
+          <div className="feat-check-item">
+            <span className="check-icon">✓</span>
             <span>Permanent History & Unlimited ADR Saves</span>
           </div>
-          <div className="summary-item">
-            <span className="bullet">✓</span>
-            <span>High-Speed Parallel Queue Priority</span>
+          <div className="feat-check-item">
+            <span className="check-icon">✓</span>
+            <span>Priority Queue Dialectic Processing</span>
           </div>
         </div>
-      </Card>
+      </div>
 
-      {/* Invoice History */}
-      <Card className="invoices-card mt-8">
-        <div className="invoices-header">
-          <h3 className="card-heading">Invoice History</h3>
-          <Link to="/app/billing/invoices" className="view-invoices-link">
-            All Invoices ({invoices.length}) →
-          </Link>
+      {/* Invoice History Table */}
+      <div className="clean-card-box mt-6">
+        <div className="box-title-row">
+          <h3 className="box-title">Invoice & Receipt History</h3>
+          <span className="text-muted text-xs">{invoices.length} billing records</span>
         </div>
 
-        <div className="invoices-table-wrap mt-4">
-          <table className="invoices-table">
+        <div className="invoices-table-container mt-4">
+          <table className="clean-invoices-table">
             <thead>
               <tr>
                 <th>Invoice</th>
-                <th>Date</th>
-                <th>Plan Description</th>
+                <th>Billing Date</th>
+                <th>Plan Tier</th>
                 <th>Amount</th>
                 <th>Status</th>
-                <th>Action</th>
+                <th className="text-right">Action</th>
               </tr>
             </thead>
             <tbody>
               {invoices.map((inv) => (
                 <tr key={inv.id}>
-                  <td className="font-mono">{inv.id}</td>
+                  <td className="font-mono text-cyan">{inv.id}</td>
                   <td>{inv.date}</td>
-                  <td>{inv.description}</td>
-                  <td className="font-bold">{inv.amount}</td>
+                  <td>{inv.plan}</td>
+                  <td className="font-semibold">{inv.amount}</td>
                   <td>
-                    <Badge variant="success" size="sm">{inv.status}</Badge>
+                    <span className="paid-pill">Paid</span>
                   </td>
-                  <td>
+                  <td className="text-right">
                     <button
                       type="button"
-                      className="download-pdf-btn"
+                      className="download-text-btn"
                       onClick={() => handleDownloadInvoice(inv.id)}
                     >
-                      PDF ↗
+                      Download PDF
                     </button>
                   </td>
                 </tr>
@@ -128,7 +116,7 @@ export const BillingPage = () => {
             </tbody>
           </table>
         </div>
-      </Card>
+      </div>
     </div>
   );
 };

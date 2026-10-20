@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { mockBattleService } from '../../services/mock/mockBattleService';
@@ -7,12 +7,10 @@ import { mockSavedService } from '../../services/mock/mockSavedService';
 import { models } from '../../data/models';
 import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
-import { Badge } from '../../components/common/Badge';
 
 export const DashboardHome = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
-  const navigate = useNavigate();
 
   const [recentBattles, setRecentBattles] = useState([]);
   const [savedAnswers, setSavedAnswers] = useState([]);
@@ -38,220 +36,142 @@ export const DashboardHome = () => {
 
   const handleCopy = (text) => {
     navigator.clipboard?.writeText(text);
-    showToast('Copied synthesis to clipboard!', 'success');
+    showToast('Copied synthesis verdict to clipboard!', 'success');
   };
 
   return (
     <div className="dashboard-home-view">
-      {/* Welcome Hero Banner */}
-      <div className="dashboard-welcome-banner">
-        <div className="welcome-text-col">
-          <Link to="/app/war-room" className="welcome-eyebrow">
-            <span className="live-dot"></span>
-            <span>DIALECTIC WAR ROOM ACTIVE · ENTER CHAMBER →</span>
-          </Link>
-          <h1 className="welcome-heading">
-            Welcome back, {user?.name || 'Explorer'}
-          </h1>
-          <p className="welcome-sub">
-            Your multi-model arena is primed. Compare reasoning, challenge competing answers, and synthesize unified truth.
+      {/* 1. Header & Primary Action */}
+      <div className="dashboard-header-block">
+        <div>
+          <h1 className="dash-heading">Welcome back, {user?.name || 'Explorer'}</h1>
+          <p className="dash-sub">
+            Your multi-model arena is primed. Compare reasoning, expose blind spots, and synthesize unified truth.
           </p>
         </div>
-
-        <div className="welcome-cta-col flex items-center gap-3">
+        <div className="dash-cta-actions">
           <Link to="/app/war-room">
-            <Button variant="secondary" size="lg" icon="🕸">
-              Live War Room
+            <Button variant="outline" size="md" icon="⚡">
+              War Room
             </Button>
           </Link>
           <Link to="/app/arena">
-            <Button variant="primary" size="lg" icon="⚔">
+            <Button variant="primary" size="md" icon="⚔">
               Start New Battle
             </Button>
           </Link>
         </div>
       </div>
 
-      {/* Metrics & Quota Row */}
-      <div className="dashboard-stats-grid">
-        <Card className="stat-card">
-          <div className="stat-header">
-            <span className="stat-label">Total Battles Conducted</span>
-            <span className="stat-icon">⚔</span>
-          </div>
-          <div className="stat-number">{user?.stats?.totalBattles || 142}</div>
-          <span className="stat-sub">Across 6 model profiles</span>
-        </Card>
+      {/* 2. Three Clean Summary Cards (No Clutter) */}
+      <div className="dashboard-metrics-row">
+        <div className="metric-box">
+          <span className="metric-box-label">Battles Conducted</span>
+          <div className="metric-box-val">{user?.stats?.totalBattles || 142}</div>
+          <span className="metric-box-sub">Across 6 foundational models</span>
+        </div>
 
-        <Card className="stat-card">
-          <div className="stat-header">
-            <span className="stat-label">Clashes Resolved</span>
-            <span className="stat-icon">✦</span>
-          </div>
-          <div className="stat-number">{user?.stats?.clashesResolved || 419}</div>
-          <span className="stat-sub">Average consensus score: 93%</span>
-        </Card>
+        <div className="metric-box">
+          <span className="metric-box-label">Average Consensus</span>
+          <div className="metric-box-val text-cyan">94%</div>
+          <span className="metric-box-sub">Resolved across 419 trade-offs</span>
+        </div>
 
-        <Card className="stat-card">
-          <div className="stat-header">
-            <span className="stat-label">Tokens Synthesized</span>
-            <span className="stat-icon">🧠</span>
+        <div className="metric-box">
+          <span className="metric-box-label">Monthly Credits</span>
+          <div className="metric-box-val">420 <span className="metric-unit">/ 1,000</span></div>
+          <div className="metric-mini-bar">
+            <div className="bar-fill" style={{ width: '42%' }}></div>
           </div>
-          <div className="stat-number">{user?.stats?.tokensSynthesized || '1.8M'}</div>
-          <span className="stat-sub">Zero-data retention verified</span>
-        </Card>
-
-        <Card className="stat-card plan-stat-card">
-          <div className="stat-header">
-            <span className="stat-label">Current Plan</span>
-            <Badge variant="cyan" size="sm">Active</Badge>
-          </div>
-          <div className="stat-number">Pro Dialectic</div>
-          <div className="plan-usage-mini">
-            <div className="progress-bar-track">
-              <div className="progress-bar-fill" style={{ width: '42%' }}></div>
-            </div>
-            <span className="usage-mini-text">420 / 1,000 monthly credits</span>
-          </div>
-          <Link to="/pricing" className="upgrade-link-text">Upgrade plan →</Link>
-        </Card>
+        </div>
       </div>
 
-      {/* Two Columns: Recent Battles & Saved Answers */}
-      <div className="dashboard-main-grid mt-6">
-        {/* Left Column: Recent Battles */}
-        <div className="dashboard-col-left">
-          <div className="section-title-bar">
-            <div className="flex items-center gap-2">
-              <span className="bar-icon">📜</span>
-              <h3 className="bar-title">Recent Dialectic Battles</h3>
-            </div>
-            <Link to="/app/history" className="view-all-link">View all ({recentBattles.length}) →</Link>
+      {/* 3. Main Workspace: Recent Activity & Saved ADRs */}
+      <div className="dashboard-split-grid mt-6">
+        {/* Left Column: Recent Dialectic Battles */}
+        <div className="dash-column">
+          <div className="column-title-bar">
+            <h3 className="column-title">Recent Dialectic Battles</h3>
+            <Link to="/app/history" className="text-link-sm">View All ({recentBattles.length}) →</Link>
           </div>
 
-          <div className="recent-battles-list">
+          <div className="battles-clean-list">
             {recentBattles.length === 0 ? (
-              <Card className="empty-card text-center py-8">
-                <p className="text-muted">No battles recorded yet. Launch your first arena session!</p>
-                <div className="mt-4">
-                  <Link to="/app/arena">
-                    <Button variant="primary" size="sm">Start Battle</Button>
-                  </Link>
-                </div>
+              <Card className="empty-panel text-center py-6">
+                <p className="text-muted">No battles recorded yet.</p>
+                <Link to="/app/arena" className="mt-3 inline-block">
+                  <Button variant="primary" size="sm">Start Battle</Button>
+                </Link>
               </Card>
             ) : (
               recentBattles.map((b) => (
-                <Card key={b.id} hoverable className="battle-summary-card">
-                  <div className="battle-card-header">
-                    <span className="battle-topic-badge">{b.topic || 'Architecture'}</span>
-                    <span className="battle-date-label">
-                      {new Date(b.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                    </span>
+                <div key={b.id} className="battle-clean-row">
+                  <div className="battle-info-main">
+                    <div className="battle-tag-date">
+                      <span className="clean-topic-badge">{b.topic || 'Architecture'}</span>
+                      <span className="clean-date-text">
+                        {new Date(b.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                      </span>
+                    </div>
+                    <h4 className="battle-row-title">
+                      <Link to={`/app/arena/${b.id}`}>{b.title}</Link>
+                    </h4>
+                    <p className="battle-row-summary">{b.summary}</p>
                   </div>
 
-                  <h4 className="battle-card-title">
-                    <Link to={`/app/arena/${b.id}`}>{b.title}</Link>
-                  </h4>
-
-                  <p className="battle-card-summary">{b.summary}</p>
-
-                  <div className="battle-card-footer">
-                    <div className="models-avatars-row">
-                      {b.models?.map((mId) => {
-                        const m = models.find((mod) => mod.id === mId);
-                        return (
-                          <span
-                            key={mId}
-                            className="mini-model-pill"
-                            style={{ borderColor: m?.accent?.color || '#00D9FF' }}
-                          >
-                            {m?.name || mId}
-                          </span>
-                        );
-                      })}
-                    </div>
-
-                    <div className="battle-actions">
-                      {b.consensusScore && (
-                        <span className="consensus-badge">
-                          ★ {b.consensusScore}% Consensus
-                        </span>
-                      )}
-                      <Link to={`/app/arena/${b.id}`}>
-                        <Button variant="outline" size="sm">
-                          Review →
-                        </Button>
-                      </Link>
-                    </div>
+                  <div className="battle-row-side">
+                    {b.consensusScore && (
+                      <span className="consensus-pill">★ {b.consensusScore}%</span>
+                    )}
+                    <Link to={`/app/arena/${b.id}`}>
+                      <Button variant="outline" size="sm">Review →</Button>
+                    </Link>
                   </div>
-                </Card>
+                </div>
               ))
             )}
           </div>
         </div>
 
-        {/* Right Column: Saved ADRs & Model Quick Launch */}
-        <div className="dashboard-col-right">
-          {/* Saved Answers Card */}
-          <div className="section-title-bar">
-            <div className="flex items-center gap-2">
-              <span className="bar-icon">💾</span>
-              <h3 className="bar-title">Saved Consensus ADRs</h3>
-            </div>
-            <Link to="/app/saved" className="view-all-link">View all →</Link>
+        {/* Right Column: Saved Consensus Answers */}
+        <div className="dash-column">
+          <div className="column-title-bar">
+            <h3 className="column-title">Saved Consensus ADRs</h3>
+            <Link to="/app/saved" className="text-link-sm">All Records ({savedAnswers.length}) →</Link>
           </div>
 
-          <div className="saved-answers-list">
-            {savedAnswers.map((s) => (
-              <Card key={s.id} className="saved-answer-card">
-                <div className="saved-top">
-                  <h4 className="saved-title">{s.title}</h4>
-                  <button
-                    className="copy-icon-btn"
-                    onClick={() => handleCopy(s.verdict)}
-                    title="Copy ADR Verdict"
-                  >
-                    📋
-                  </button>
-                </div>
-                <p className="saved-question">{s.question}</p>
-                <div className="saved-footer">
-                  <span className="saved-models-count">
-                    {s.modelsUsed?.length} Models Synthesized
-                  </span>
-                  <Link to={`/app/arena/${s.battleId}`} className="inspect-link">
-                    Open Chamber →
-                  </Link>
-                </div>
+          <div className="saved-clean-list">
+            {savedAnswers.length === 0 ? (
+              <Card className="empty-panel text-center py-6">
+                <p className="text-muted">No saved answers yet. In any debate, click "Save to ADR".</p>
               </Card>
-            ))}
+            ) : (
+              savedAnswers.map((s) => (
+                <div key={s.id} className="saved-clean-row">
+                  <div className="saved-row-header">
+                    <h4 className="saved-row-title">{s.title}</h4>
+                    <button
+                      type="button"
+                      className="copy-mini-btn"
+                      onClick={() => handleCopy(s.verdict)}
+                      title="Copy Verdict"
+                    >
+                      📋 Copy
+                    </button>
+                  </div>
+                  <p className="saved-row-verdict">{s.verdict}</p>
+                  <div className="saved-row-footer">
+                    <span className="models-mini-tag">
+                      Models: {s.modelsUsed?.join(', ')}
+                    </span>
+                    <Link to={`/app/arena/${s.battleId}`} className="text-link-xs">
+                      Open Debate →
+                    </Link>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
-
-          {/* Model Roster Quick Launch */}
-          <div className="section-title-bar mt-6">
-            <div className="flex items-center gap-2">
-              <span className="bar-icon">🧠</span>
-              <h3 className="bar-title">Arena Combatant Roster</h3>
-            </div>
-            <Link to="/app/models" className="view-all-link">Catalog →</Link>
-          </div>
-
-          <Card className="roster-quick-card">
-            <div className="roster-pills-wrap">
-              {models.map((m) => (
-                <Link
-                  key={m.id}
-                  to={`/app/arena?model=${m.id}`}
-                  className="roster-item-pill"
-                  style={{ '--border-accent': m.accent.color }}
-                >
-                  <span className="dot" style={{ backgroundColor: m.accent.color }}></span>
-                  <span className="name">{m.name}</span>
-                  <span className="arrow">↗</span>
-                </Link>
-              ))}
-            </div>
-          </Card>
         </div>
       </div>
     </div>

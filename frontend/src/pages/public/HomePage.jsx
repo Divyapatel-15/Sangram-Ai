@@ -7,162 +7,145 @@ import { Button } from '../../components/common/Button';
 
 export const HomePage = () => {
   const [activeFaq, setActiveFaq] = useState(0);
-  const [activeTab, setActiveTab] = useState('demo-1');
 
   const benefits = [
     {
       num: '01',
       title: 'Multiple Perspectives',
-      desc: 'Never rely on a single model’s idiosyncratic bias. Compare answers from different model architectures simultaneously.',
-      icon: '👁'
+      desc: 'Never rely on a single model’s blind spots. Compare answers from different frontier architectures side by side in real time.',
+      icon: '✦'
     },
     {
       num: '02',
-      title: 'Challenge the Answers',
-      desc: 'Models actively critique each other’s claims in multiple structured rounds, exposing omissions, hallucinations, and unverified assumptions.',
+      title: 'Structured Cross-Examination',
+      desc: 'Models actively critique each other’s claims across multiple rounds, exposing omissions, hallucinations, and unverified assumptions.',
       icon: '⚔'
     },
     {
       num: '03',
       title: 'One Consolidated Answer',
-      desc: 'Our Dialectic Synthesis engine extracts points of agreement, separates legitimate trade-offs, and delivers one clear, actionable conclusion.',
-      icon: '✦'
+      desc: 'Our Dialectic Synthesis engine extracts points of agreement, resolves legitimate trade-offs, and delivers one clear, actionable conclusion.',
+      icon: '⚡'
     }
   ];
 
   const steps = [
     {
       step: '01',
-      title: 'Select Models',
-      desc: 'Pick 2 or more leading foundational models (GPT, Claude, Gemini, Llama, Mistral, Grok) and optional cognitive personas.'
+      title: 'Select Combatants',
+      desc: 'Choose two frontier AI models (e.g. Claude 3.5 Sonnet vs GPT-4o) and assign distinct cognitive perspectives.'
     },
     {
       step: '02',
-      title: 'Ask a Question',
-      desc: 'Submit a hard technical dilemma, architectural trade-off, research query, or strategic business problem.'
+      title: 'State the Dilemma',
+      desc: 'Submit a hard technical trade-off, architectural question, strategic decision, or research query.'
     },
     {
       step: '03',
-      title: 'Enter the Battle',
-      desc: 'Watch the models debate in real time: presenting opening claims, raising counterarguments, and defending their logic.'
+      title: 'Witness the Debate',
+      desc: 'Models debate across rounds: presenting thesis claims, raising counterarguments, and revising their positions.'
     },
     {
       step: '04',
-      title: 'Get the Final Answer',
-      desc: 'Review the synthesized verdict, consensus score, key tensions, and copy the unified response directly into your workflow.'
+      title: 'Receive Synthesis',
+      desc: 'Review a unified verdict with a consensus score, trade-off breakdown, and copy it directly to your workflow.'
     }
   ];
 
   return (
     <div className="home-page-view">
-      {/* SECTION 2: Animated Hero with Video / Ambient Background */}
+      {/* SECTION 1: Clean, Focused Hero */}
       <section className="home-hero-section">
-        {/* Remote Video Background from specs */}
-        <div className="hero-video-wrap" aria-hidden="true">
-          <video
-            className="hero-art-video"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-            poster="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/130837c4-0244-4f37-9c61-8d801d93fd29.jpg"
-            src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260912_104303_0c6d60b2-9353-408e-9449-585108a22fb5.mp4"
-          />
-          <div className="hero-veil-overlay"></div>
-        </div>
+        <div className="hero-ambient-glow" aria-hidden="true"></div>
 
         <div className="hero-content-container">
-          <div className="hero-badge animate-fade-in">
+          <div className="hero-badge">
             <span className="hero-badge-dot"></span>
             <span>DIALECTIC AI WORKSPACE</span>
           </div>
 
-          <h1 className="hero-main-title animate-reveal-up">
+          <h1 className="hero-main-title">
             Different Minds.<br />
             <span className="hero-glow-text">One Arena.</span>
           </h1>
 
-          <p className="hero-supporting-title animate-reveal-up delay-1">
+          <p className="hero-supporting-title">
             What Happens When AI Challenges AI?
           </p>
 
-          <p className="hero-description-text animate-reveal-up delay-2">
+          <p className="hero-description-text">
             Bring different AI models into one arena. Compare their reasoning, challenge their answers, and discover one consolidated response.
           </p>
 
-          <div className="hero-actions-row animate-reveal-up delay-3">
-            <Link to="/app/arena/new">
+          <div className="hero-actions-row">
+            <Link to="/app/arena">
               <Button variant="primary" size="lg" className="hero-primary-btn" icon="⚔">
                 Enter the Arena
               </Button>
             </Link>
-            <Link to="/how-it-works">
+            <a href="#how-it-works">
               <Button variant="outline" size="lg" className="hero-secondary-btn">
-                Explore How It Works →
+                Explore How It Works ↓
               </Button>
-            </Link>
+            </a>
           </div>
 
-          <div className="hero-trust-row animate-fade-in delay-3">
+          <div className="hero-trust-row">
             <span className="trust-label">Compatible with leading foundational model profiles:</span>
             <div className="trust-model-chips">
               <span className="t-chip">ChatGPT</span>
-              <span className="t-chip">Gemini</span>
               <span className="t-chip">Claude</span>
+              <span className="t-chip">Gemini</span>
               <span className="t-chip">Llama</span>
               <span className="t-chip">Mistral</span>
-              <span className="t-chip">Grok</span>
+              <span className="t-chip">DeepSeek</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* SECTION 3: Animated AI Arena Visual Showcase */}
+      {/* SECTION 2: Clean Arena Demonstration Visual */}
       <section className="section-arena-visual">
         <div className="section-container">
           <div className="section-header text-center">
             <span className="section-tag">LIVE DEMONSTRATION</span>
             <h2 className="section-title">The Dialectic Arena in Action</h2>
             <p className="section-desc">
-              Watch how two distinct models examine the question: <em>"Should an early-stage startup adopt Microservices or a Modular Monolith?"</em>
+              Two models examine: <em>"Should an early-stage B2B SaaS adopt Microservices or a Modular Monolith?"</em>
             </p>
           </div>
 
           <div className="arena-interactive-card">
-            {/* Arena Top Bar */}
+            {/* Top Bar */}
             <div className="arena-card-topbar">
               <div className="arena-status-group">
                 <span className="status-live-dot"></span>
                 <span className="status-live-text">ROUND 2 OF 3 · CROSS-EXAMINATION</span>
               </div>
               <div className="arena-model-pills">
-                <span className="model-pill pill-gpt">ChatGPT (GPT-5)</span>
+                <span className="model-pill pill-gpt">ChatGPT (GPT-4o)</span>
                 <span className="vs-connector">VS</span>
-                <span className="model-pill pill-claude">Claude (Sonnet 4.5)</span>
+                <span className="model-pill pill-claude">Claude (Sonnet 3.5)</span>
               </div>
             </div>
 
-            {/* Arena Clash Streams */}
+            {/* Clash Stream */}
             <div className="arena-clash-body">
               <div className="clash-column col-left">
                 <div className="fighter-badge fighter-gpt">
                   <span className="f-icon">✦</span>
                   <span className="f-name">ChatGPT</span>
-                  <span className="f-role">Initial Defense</span>
+                  <span className="f-role">Initial Thesis</span>
                 </div>
                 <div className="clash-speech-bubble">
                   <p>
-                    "Microservices decouple continuous deployments and allow independent team velocity. If your startup anticipates rapid scaling across distinct domains, establishing boundaries early prevents costly refactors."
+                    "Microservices allow independent deployment velocity and isolate domain failures. If your startup anticipates rapid scaling, establishing network boundaries early prevents painful monolithic refactors later."
                   </p>
                 </div>
               </div>
 
-              {/* Dynamic Center Clash Indicator */}
               <div className="clash-center-dialectic">
-                <div className="dialectic-pulse-ring"></div>
                 <span className="dialectic-vs">VS</span>
-                <div className="dialectic-arrows">⮂ ⮃</div>
               </div>
 
               <div className="clash-column col-right">
@@ -173,29 +156,29 @@ export const HomePage = () => {
                 </div>
                 <div className="clash-speech-bubble">
                   <p>
-                    "That advice overlooks operational drag. A seed startup with 6 engineers will waste 40% of sprint capacity managing gRPC interfaces, network latency, and distributed traces. A Modular Monolith yields identical boundaries with zero deployment penalty."
+                    "That advice ignores distributed systems tax. A seed team with 6 engineers will waste 40% of sprint capacity managing gRPC interfaces, network latency, and distributed traces. A Modular Monolith yields identical boundaries with zero operational overhead."
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Final Consolidated Synthesis Card */}
+            {/* Synthesis Verdict */}
             <div className="arena-synthesis-verdict">
               <div className="verdict-header">
                 <div className="verdict-title-group">
                   <span className="verdict-star">★</span>
-                  <h4 className="verdict-heading">Consolidated Dialectic Synthesis</h4>
+                  <h4 className="verdict-heading">Consolidated Dialectic Verdict</h4>
                 </div>
                 <span className="confidence-pill">94% Consensus Score</span>
               </div>
               <div className="verdict-body">
                 <p className="verdict-takeaway">
-                  <strong>Unified Conclusion:</strong> Build a <strong>Modular Monolith</strong> now with strict directory-level boundary enforcement. Only bifurcate a service into an autonomous microservice when that specific module experiences 10x differential traffic or requires dedicated hardware acceleration.
+                  <strong>Unified Conclusion:</strong> Build a <strong>Modular Monolith</strong> now with strict directory-level boundary enforcement. Only bifurcate a component into an independent microservice when that specific module experiences 10x differential traffic or requires dedicated hardware acceleration.
                 </p>
               </div>
               <div className="verdict-footer">
-                <span className="tensions-tag">Resolved: Operational Tax vs Boundary Integrity</span>
-                <Link to="/app/arena/new" className="try-arena-link">
+                <span className="tensions-tag">Resolved: Operational Tax vs Domain Isolation</span>
+                <Link to="/app/arena" className="try-arena-link">
                   Launch Custom Battle with this Prompt →
                 </Link>
               </div>
@@ -204,7 +187,7 @@ export const HomePage = () => {
         </div>
       </section>
 
-      {/* SECTION 4: Product Benefits */}
+      {/* SECTION 3: Product Benefits */}
       <section className="section-benefits">
         <div className="section-container">
           <div className="section-header text-center">
@@ -230,22 +213,19 @@ export const HomePage = () => {
         </div>
       </section>
 
-      {/* SECTION 5: How It Works */}
-      <section className="section-how-it-works">
+      {/* SECTION 4: How It Works */}
+      <section className="section-how-it-works" id="how-it-works">
         <div className="section-container">
           <div className="section-header text-center">
             <span className="section-tag">WORKFLOW</span>
             <h2 className="section-title">From Question to Consolidated Truth</h2>
-            <p className="section-desc">Four deliberate stages designed to extract high-conviction insights.</p>
+            <p className="section-desc">Four structured stages designed to extract high-conviction answers.</p>
           </div>
 
           <div className="steps-connected-grid">
-            {steps.map((st, idx) => (
+            {steps.map((st) => (
               <div key={st.step} className="step-card">
-                <div className="step-indicator">
-                  <span className="step-num">{st.step}</span>
-                  {idx < steps.length - 1 && <span className="step-connector-line"></span>}
-                </div>
+                <div className="step-num-badge">{st.step}</div>
                 <h3 className="step-title">{st.title}</h3>
                 <p className="step-desc">{st.desc}</p>
               </div>
@@ -254,12 +234,12 @@ export const HomePage = () => {
         </div>
       </section>
 
-      {/* SECTION 6: Model Showcase */}
+      {/* SECTION 5: Supported Models */}
       <section className="section-models-showcase">
         <div className="section-container">
           <div className="section-header text-center">
             <span className="section-tag">THE COMBATANTS</span>
-            <h2 className="section-title">Six World-Class Model Profiles</h2>
+            <h2 className="section-title">Six World-Class Model Architectures</h2>
             <p className="section-desc">
               Each tuned with distinct epistemic traits, strengths, and reasoning styles.
             </p>
@@ -267,11 +247,7 @@ export const HomePage = () => {
 
           <div className="models-showcase-grid">
             {models.map((m) => (
-              <div
-                key={m.id}
-                className="showcase-model-card"
-                style={{ '--model-accent': m.accent.color }}
-              >
+              <div key={m.id} className="showcase-model-card">
                 <div className="model-card-top">
                   <span className="m-accent-dot" style={{ backgroundColor: m.accent.color }}></span>
                   <span className="m-name">{m.name}</span>
@@ -281,7 +257,7 @@ export const HomePage = () => {
                 <p className="m-desc">{m.desc}</p>
                 <div className="m-footer">
                   <span className="m-status-text">Ready in Arena</span>
-                  <Link to="/app/arena/new" className="m-select-btn">Deploy →</Link>
+                  <Link to="/app/arena" className="m-select-btn">Deploy →</Link>
                 </div>
               </div>
             ))}
@@ -289,46 +265,12 @@ export const HomePage = () => {
         </div>
       </section>
 
-      {/* SECTION 7: Example Battle Preview */}
-      <section className="section-example-battle">
-        <div className="section-container">
-          <div className="battle-preview-box">
-            <div className="preview-header">
-              <div>
-                <span className="preview-tag">FEATURED ARCHITECTURAL DIALECTIC</span>
-                <h3 className="preview-title">PostgreSQL with pgvector vs Dedicated Vector Databases</h3>
-              </div>
-              <Link to="/app/arena/new">
-                <Button variant="secondary" size="sm">Run in Arena ↗</Button>
-              </Link>
-            </div>
-            <div className="preview-quote-grid">
-              <div className="quote-col">
-                <span className="quote-speaker speaker-gemini">Gemini 2.5 Pro (Multimodal)</span>
-                <p>
-                  "For 90% of RAG architectures, maintaining database transactions and relational joins alongside embeddings in PostgreSQL eliminates network sync issues."
-                </p>
-              </div>
-              <div className="quote-col">
-                <span className="quote-speaker speaker-llama">Llama 4 (Systems Engineer)</span>
-                <p>
-                  "Agreed up to 10M embeddings. Beyond that, specialized HNSW indexing and distributed cache layers justify dedicated vector infrastructure."
-                </p>
-              </div>
-            </div>
-            <div className="preview-synthesis-summary">
-              <strong>Consensus:</strong> Start with PostgreSQL pgvector; partition by tenant ID until query latency p99 exceeds 45ms.
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 8: Pricing Preview */}
+      {/* SECTION 6: Transparent Pricing Preview */}
       <section className="section-pricing-preview">
         <div className="section-container">
           <div className="section-header text-center">
             <span className="section-tag">TRANSPARENT PLANS</span>
-            <h2 className="section-title">Built for Curious Minds and Engineering Teams</h2>
+            <h2 className="section-title">Built for Engineers, Researchers, and Teams</h2>
             <p className="section-desc">Choose a tier that matches your dialectic volume.</p>
           </div>
 
@@ -343,7 +285,7 @@ export const HomePage = () => {
                   <span className="price-period">{plan.period}</span>
                 </div>
                 <ul className="plan-feature-list">
-                  {plan.features.slice(0, 5).map((f, i) => (
+                  {plan.features.slice(0, 4).map((f, i) => (
                     <li key={i} className={f.included ? 'feat-yes' : 'feat-no'}>
                       <span>{f.included ? '✓' : '—'}</span>
                       <span>{f.text}</span>
@@ -367,21 +309,22 @@ export const HomePage = () => {
         </div>
       </section>
 
-      {/* SECTION 9: FAQ Section */}
+      {/* SECTION 7: FAQ */}
       <section className="section-faq">
         <div className="section-container">
           <div className="section-header text-center">
-            <span className="section-tag">GOT QUESTIONS?</span>
-            <h2 className="section-title">Frequently Asked Questions</h2>
+            <span className="section-tag">FREQUENTLY ASKED QUESTIONS</span>
+            <h2 className="section-title">Answers to Common Inquiries</h2>
             <p className="section-desc">Everything you need to know about dialectic battles.</p>
           </div>
 
           <div className="faq-accordion-list">
-            {mockFaqs.map((faq, index) => {
+            {mockFaqs.slice(0, 5).map((faq, index) => {
               const isOpen = activeFaq === index;
               return (
                 <div key={index} className={`faq-item ${isOpen ? 'open' : ''}`}>
                   <button
+                    type="button"
                     className="faq-question-btn"
                     onClick={() => setActiveFaq(isOpen ? -1 : index)}
                     aria-expanded={isOpen}
@@ -390,7 +333,7 @@ export const HomePage = () => {
                     <span className="faq-chevron">{isOpen ? '−' : '+'}</span>
                   </button>
                   {isOpen && (
-                    <div className="faq-answer-body animate-fade-in">
+                    <div className="faq-answer-body">
                       <p>{faq.a}</p>
                     </div>
                   )}
@@ -401,17 +344,16 @@ export const HomePage = () => {
         </div>
       </section>
 
-      {/* SECTION 10: Final CTA */}
+      {/* SECTION 8: Final CTA */}
       <section className="section-final-cta">
         <div className="section-container">
           <div className="final-cta-card">
-            <div className="cta-ambient-glow"></div>
             <h2 className="cta-headline">Ready to Enter the Arena?</h2>
             <p className="cta-desc">
-              Bring different perspectives together and explore a better answer. Start your first multi-model battle now.
+              Bring different perspectives together and reach a stronger conclusion. Launch your first dialectic session in seconds.
             </p>
             <div className="cta-btn-group">
-              <Link to="/app/arena/new">
+              <Link to="/app/arena">
                 <Button variant="primary" size="lg" icon="⚔">
                   Enter the Arena Now
                 </Button>

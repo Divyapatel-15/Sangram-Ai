@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { mockBattleService } from '../../services/mock/mockBattleService';
-import { models } from '../../data/models';
 import { Button } from '../../components/common/Button';
-import { Card } from '../../components/common/Card';
-import { Input } from '../../components/common/Input';
-import { EmptyState } from '../../components/common/EmptyState';
 
 export const HistoryPage = () => {
   const [battles, setBattles] = useState([]);
@@ -38,7 +34,7 @@ export const HistoryPage = () => {
           <h1 className="page-title">Battle History & Logs</h1>
           <p className="page-sub">Review past multi-model dialectic sessions and synthesis records.</p>
         </div>
-        <Link to="/app/arena/new">
+        <Link to="/app/arena">
           <Button variant="primary" icon="⚔">New Battle</Button>
         </Link>
       </div>
@@ -46,8 +42,10 @@ export const HistoryPage = () => {
       {/* Filter and Search Bar */}
       <div className="filter-search-bar mt-6">
         <div className="search-box-wrap">
-          <Input
-            placeholder="Search by topic, thesis, or keyword..."
+          <input
+            type="text"
+            className="clean-input"
+            placeholder="Search battles by dilemma topic, model, or keyword..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -57,7 +55,7 @@ export const HistoryPage = () => {
             <button
               key={t}
               type="button"
-              className={`tag-filter-btn ${selectedTag === t ? 'active' : ''}`}
+              className={`tag-pill-btn ${selectedTag === t ? 'active' : ''}`}
               onClick={() => setSelectedTag(t)}
             >
               {t}
@@ -66,66 +64,44 @@ export const HistoryPage = () => {
         </div>
       </div>
 
-      {/* History List */}
-      <div className="history-list-grid mt-6">
+      {/* Clean History List */}
+      <div className="history-clean-list mt-6">
         {filtered.length === 0 ? (
-          <EmptyState
-            icon="📜"
-            title="No Dialectic Battles Found"
-            description="No battle records match your filter criteria. Initiate a new battle in the arena!"
-            actionText="Launch New Battle"
-            onAction={() => window.location.href = '/app/arena/new'}
-          />
+          <div className="empty-panel text-center py-8">
+            <p className="text-muted">No battle logs match your search.</p>
+          </div>
         ) : (
           filtered.map((b) => (
-            <Card key={b.id} hoverable className="history-item-card">
-              <div className="history-item-top">
-                <div className="topic-date-wrap">
-                  <span className="topic-badge">{b.topic || 'General'}</span>
-                  <span className="date-text">
+            <div key={b.id} className="history-row-item">
+              <div className="history-row-main">
+                <div className="history-meta-bar">
+                  <span className="clean-topic-badge">{b.topic || 'General'}</span>
+                  <span className="clean-date-text">
                     {new Date(b.date).toLocaleDateString(undefined, {
                       year: 'numeric',
                       month: 'short',
                       day: 'numeric'
                     })}
                   </span>
+                  {b.consensusScore && (
+                    <span className="consensus-pill">★ {b.consensusScore}% Consensus</span>
+                  )}
                 </div>
-                {b.consensusScore && (
-                  <span className="consensus-badge">
-                    ★ {b.consensusScore}% Consensus
-                  </span>
-                )}
+
+                <h3 className="history-item-title">
+                  <Link to={`/app/arena/${b.id}`}>{b.title}</Link>
+                </h3>
+                <p className="history-item-summary">{b.summary}</p>
               </div>
 
-              <h3 className="history-item-title">
-                <Link to={`/app/arena/${b.id}`}>{b.title}</Link>
-              </h3>
-
-              <p className="history-item-summary">{b.summary}</p>
-
-              <div className="history-item-footer">
-                <div className="combatants-chips">
-                  {b.models?.map(mId => {
-                    const m = models.find(x => x.id === mId);
-                    return (
-                      <span
-                        key={mId}
-                        className="combatant-chip"
-                        style={{ borderColor: m?.accent?.color || '#00D9FF' }}
-                      >
-                        {m?.name || mId}
-                      </span>
-                    );
-                  })}
-                </div>
-
+              <div className="history-row-actions">
                 <Link to={`/app/arena/${b.id}`}>
                   <Button variant="outline" size="sm">
-                    Open Chamber →
+                    Open Battle →
                   </Button>
                 </Link>
               </div>
-            </Card>
+            </div>
           ))
         )}
       </div>

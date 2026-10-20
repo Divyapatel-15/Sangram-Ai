@@ -3610,6 +3610,19 @@ section[id] { scroll-margin-top: calc(var(--header-h) + 12px); }
 }
 
 /* 8. Hero Section with Video */
+.hero-ambient-glow {
+  position: absolute;
+  top: 25%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 700px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(0, 217, 255, 0.09) 0%, rgba(67, 136, 255, 0.04) 50%, transparent 75%);
+  filter: blur(90px);
+  pointer-events: none;
+  z-index: 0;
+}
+
 .home-hero-section {
   position: relative;
   min-height: 82vh;
@@ -3670,7 +3683,7 @@ section[id] { scroll-margin-top: calc(var(--header-h) + 12px); }
 
 .hero-main-title {
   font-family: var(--font-display, sans-serif);
-  font-size: 4rem;
+  font-size: clamp(2.2rem, 5vw, 3.75rem);
   font-weight: 800;
   line-height: 1.1;
   letter-spacing: -0.03em;
