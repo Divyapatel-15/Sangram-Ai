@@ -1,209 +1,123 @@
-import { useCallback, useEffect, useState } from 'react'
-import './styles/global.css'
-import './App.css'
-import Navbar from './components/Navbar'
-import Landing from './components/Landing'
-import Config from './components/Config'
-import Arena from './components/Arena'
-import Results from './components/Results'
-import CompletedDebate from './components/CompletedDebate'
-import History from './components/History'
-import { getModelById } from './data/models'
-import { getArchetypeById, defaultArchetypeForModel } from './data/archetypes'
-import { generateBattle } from './services/battleService'
-import { loadHistory, saveBattleToHistory } from './services/historyStore'
-import { decodeDemoHash, clearDemoHash } from './services/shareLink'
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
 
-const TITLES = {
-  landing: 'SANGRAM AI — What Happens When AI Challenges AI?',
-  config: 'Configure Battle — SANGRAM AI',
-  arena: 'Debate Arena — SANGRAM AI',
-  results: 'Final Answer — SANGRAM AI',
-  debate: 'Full Debate — SANGRAM AI',
-  history: 'Recent Battles — SANGRAM AI'
-}
+// Layouts
+import { PublicLayout } from './layouts/PublicLayout';
+import { AuthLayout } from './layouts/AuthLayout';
+import { DashboardLayout } from './layouts/DashboardLayout';
+
+// Auth Pages
+import { LoginRootPage } from './pages/auth/LoginRootPage';
+import { LoginPage } from './pages/auth/LoginPage';
+import { SignupPage } from './pages/auth/SignupPage';
+import { VerifyEmailPage } from './pages/auth/VerifyEmailPage';
+import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
+import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
+import { OnboardingPage } from './pages/auth/OnboardingPage';
+
+// Public Marketing Pages
+import { HomePage } from './pages/public/HomePage';
+import { FeaturesPage } from './pages/public/FeaturesPage';
+import { HowItWorksPage } from './pages/public/HowItWorksPage';
+import { ModelsPage } from './pages/public/ModelsPage';
+import { PricingPage } from './pages/public/PricingPage';
+import { AboutPage } from './pages/public/AboutPage';
+import { FaqPage } from './pages/public/FaqPage';
+import { ContactPage } from './pages/public/ContactPage';
+import { PrivacyPage } from './pages/public/PrivacyPage';
+import { TermsPage } from './pages/public/TermsPage';
+import { RefundPolicyPage } from './pages/public/RefundPolicyPage';
+
+// App / Dashboard Pages
+import { DashboardHome } from './pages/app/DashboardHome';
+import { ArenaNewPage } from './pages/app/ArenaNewPage';
+import { ArenaViewPage } from './pages/app/ArenaViewPage';
+import { HistoryPage } from './pages/app/HistoryPage';
+import { SavedAnswersPage } from './pages/app/SavedAnswersPage';
+import { AppModelsPage } from './pages/app/AppModelsPage';
+import { UsagePage } from './pages/app/UsagePage';
+import { BillingPage } from './pages/app/BillingPage';
+import { BillingManagePage } from './pages/app/BillingManagePage';
+import { BillingInvoicesPage } from './pages/app/BillingInvoicesPage';
+import { BillingUpgradePage } from './pages/app/BillingUpgradePage';
+import { ProfileSettings } from './pages/app/ProfileSettings';
+import { SecuritySettings } from './pages/app/SecuritySettings';
+import { PreferencesSettings } from './pages/app/PreferencesSettings';
+
+// Checkout Pages
+import { CheckoutPage } from './pages/checkout/CheckoutPage';
+import { CheckoutSuccessPage } from './pages/checkout/CheckoutSuccessPage';
+import { CheckoutCancelledPage } from './pages/checkout/CheckoutCancelledPage';
+import { CheckoutFailedPage } from './pages/checkout/CheckoutFailedPage';
+
+// Error 404
+import { NotFoundPage } from './pages/NotFoundPage';
 
 export default function App() {
-  const [view, setView] = useState('landing')
-  const [selected, setSelected] = useState([null, null])
-  const [question, setQuestion] = useState('')
-  const [battle, setBattle] = useState(null)
-  const [starting, setStarting] = useState(false)
-  const [fatalError, setFatalError] = useState('')
-  const [fromHistory, setFromHistory] = useState(false)
-  const [sharePrefilled, setSharePrefilled] = useState(false)
-  const [savedToHistory, setSavedToHistory] = useState(false)
-  const [historyEntries, setHistoryEntries] = useState(() => loadHistory())
-
-  /* Shareable demo links: #demo=<question + two model ids> only. */
-  useEffect(() => {
-    const demo = decodeDemoHash(window.location.hash)
-    if (!demo) return
-    const a = getModelById(demo.modelIds[0])
-    const b = getModelById(demo.modelIds[1])
-    const archA = demo.archetypeIds?.[0] ? getArchetypeById(demo.archetypeIds[0]) : defaultArchetypeForModel(a?.id)
-    const archB = demo.archetypeIds?.[1] ? getArchetypeById(demo.archetypeIds[1]) : defaultArchetypeForModel(b?.id)
-    if (a || b) {
-      setQuestion(demo.question)
-      setSelected([
-        a ? { ...a, archetype: archA } : null,
-        a && b ? (b.id === a.id ? null : { ...b, archetype: archB }) : (b ? { ...b, archetype: archB } : null)
-      ])
-      setSharePrefilled(true)
-      setView('config')
-    }
-    clearDemoHash()
-  }, [])
-
-  useEffect(() => {
-    document.title = TITLES[view] || TITLES.landing
-    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
-    window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' })
-  }, [view])
-
-  const goLandingSection = useCallback((section) => {
-    setView('landing')
-    setTimeout(() => {
-      document.querySelector(section)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 50)
-  }, [])
-
-  const goHome = useCallback(() => setView('landing'), [])
-  const goEnter = useCallback(() => setView('config'), [])
-
-  const startBattle = useCallback(() => {
-    setFatalError('')
-    setStarting(true)
-    // Deterministic local generation — no network, no fake latency.
-    try {
-      const next = generateBattle(selected, question)
-      setBattle(next)
-      setSavedToHistory(false)
-      setFromHistory(false)
-      setView('arena')
-    } catch (err) {
-      setFatalError(
-        `The arena engine could not start this battle (${err?.message || 'unexpected error'}). ` +
-        'Two different models and a valid question are required — nothing was submitted anywhere.'
-      )
-    } finally {
-      setStarting(false)
-    }
-  }, [selected, question])
-
-  /* Battle finished in the arena → persist demo session, reveal results. */
-  const handleBattleComplete = useCallback((finished) => {
-    const saved = saveBattleToHistory(finished)
-    setHistoryEntries(saved ? [saved, ...loadHistory()].slice(0, 12) : loadHistory())
-    setSavedToHistory(Boolean(saved))
-    setBattle(finished)
-    setView('results')
-  }, [])
-
-  /* Abort mid-battle: dispose happens in Arena's cleanup; drop battle state. */
-  const exitArena = useCallback(() => {
-    setBattle(null)
-    setFromHistory(false)
-    setView('config')
-  }, [])
-
-  const tryAnother = useCallback(() => {
-    setBattle(null)
-    setQuestion('')
-    setFatalError('')
-    setFromHistory(false)
-    setSharePrefilled(false)
-    setView('config')
-  }, [])
-
-  const reopenHistoryEntry = useCallback((entry) => {
-    const models = entry.fighters.map((f) => {
-      const m = getModelById(f.modelId)
-      const base = m || { id: f.modelId, name: f.name, provider: f.provider, modelLabel: f.modelLabel, accent: null, apiModel: null }
-      const arch = f.archetypeId ? getArchetypeById(f.archetypeId) : defaultArchetypeForModel(f.modelId)
-      return {
-        ...base,
-        archetype: arch
-      }
-    })
-    setSelected(models)
-    setQuestion(entry.question)
-    setBattle({
-      id: entry.id,
-      question: entry.question,
-      fighters: entry.fighters,
-      messages: entry.messages,
-      roundSummaries: entry.roundSummaries || [],
-      finalAnswer: entry.finalAnswer,
-      insights: entry.insights,
-      agreement: entry.agreement,
-      source: entry.source
-    })
-    setFromHistory(true)
-    setSavedToHistory(false)
-    setView(entry.finalAnswer ? 'results' : 'debate')
-  }, [])
-
-  const openHistory = useCallback(() => {
-    setHistoryEntries(loadHistory())
-    setView('history')
-  }, [])
-
   return (
-    <div className="app-shell">
-      <div className="bg-depth" aria-hidden="true" />
-      <Navbar view={view} onNavigate={goLandingSection} onHome={goHome} onEnter={goEnter} />
+    <AuthProvider>
+      <ToastProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Root Route: Branded Sangram AI Login Experience with Animated Arena & Form Reveal */}
+            <Route path="/" element={<LoginRootPage />} />
 
-      {view === 'landing' && <Landing onEnter={goEnter} onOpenHistory={openHistory} />}
+            {/* Standard Auth Routes (Wrapped in AuthLayout) */}
+            <Route element={<AuthLayout />}>
+              <Route path="/auth/login" element={<LoginPage />} />
+              <Route path="/auth/signup" element={<SignupPage />} />
+              <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
+              <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/onboarding" element={<OnboardingPage />} />
+            </Route>
 
-      {view === 'config' && (
-        <Config
-          selected={selected}
-          setSelected={setSelected}
-          question={question}
-          setQuestion={setQuestion}
-          onStart={startBattle}
-          starting={starting}
-          fatalError={fatalError}
-          onDismissFatal={() => setFatalError('')}
-          sharePrefilled={sharePrefilled}
-        />
-      )}
+            {/* Public Marketing Website (Wrapped in PublicLayout) */}
+            <Route element={<PublicLayout />}>
+              <Route path="/home" element={<HomePage />} />
+              <Route path="/features" element={<FeaturesPage />} />
+              <Route path="/how-it-works" element={<HowItWorksPage />} />
+              <Route path="/models" element={<ModelsPage />} />
+              <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/faq" element={<FaqPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/refund-policy" element={<RefundPolicyPage />} />
+            </Route>
 
-      {view === 'arena' && (
-        <Arena
-          battle={battle}
-          selected={selected}
-          onComplete={handleBattleComplete}
-          onExit={exitArena}
-          onChangeFighters={goEnter}
-        />
-      )}
+            {/* SaaS Dashboard Shell (Wrapped in DashboardLayout) */}
+            <Route path="/app" element={<DashboardLayout />}>
+              <Route index element={<DashboardHome />} />
+              <Route path="arena/new" element={<ArenaNewPage />} />
+              <Route path="arena/:id" element={<ArenaViewPage />} />
+              <Route path="history" element={<HistoryPage />} />
+              <Route path="saved" element={<SavedAnswersPage />} />
+              <Route path="models" element={<AppModelsPage />} />
+              <Route path="usage" element={<UsagePage />} />
+              <Route path="billing" element={<BillingPage />} />
+              <Route path="billing/manage" element={<BillingManagePage />} />
+              <Route path="billing/invoices" element={<BillingInvoicesPage />} />
+              <Route path="billing/upgrade" element={<BillingUpgradePage />} />
+              <Route path="settings/profile" element={<ProfileSettings />} />
+              <Route path="settings/security" element={<SecuritySettings />} />
+              <Route path="settings/preferences" element={<PreferencesSettings />} />
+            </Route>
 
-      {view === 'results' && (
-        <Results
-          battle={battle}
-          selected={selected}
-          savedToHistory={savedToHistory}
-          fromHistory={fromHistory}
-          onViewDebate={() => setView('debate')}
-          onTryAnother={tryAnother}
-        />
-      )}
+            {/* Checkout Flow */}
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
+            <Route path="/checkout/cancelled" element={<CheckoutCancelledPage />} />
+            <Route path="/checkout/failed" element={<CheckoutFailedPage />} />
 
-      {view === 'debate' && (
-        <CompletedDebate
-          battle={battle}
-          selected={selected}
-          fromHistory={fromHistory}
-          onBackToResults={() => setView('results')}
-          onNewBattle={tryAnother}
-        />
-      )}
-
-      {view === 'history' && (
-        <History entries={historyEntries} onReopen={reopenHistoryEntry} onEnterArena={goEnter} />
-      )}
-    </div>
-  )
+            {/* 404 Catch-All */}
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </BrowserRouter>
+      </ToastProvider>
+    </AuthProvider>
+  );
 }
