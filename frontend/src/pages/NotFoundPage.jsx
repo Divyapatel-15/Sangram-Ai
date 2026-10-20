@@ -1,11 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/common/Button';
+import { Logo } from '../components/common/Logo';
 
 export const NotFoundPage = () => {
   return (
     <div className="not-found-page-view text-center py-24">
       <div className="section-container max-w-lg mx-auto">
+        <div className="flex justify-center mb-6">
+          <Logo size="xl" showWordmark={true} href="/home" />
+        </div>
         <div className="error-glitch-badge">404</div>
         <h1 className="error-title mt-4">Chamber Not Found</h1>
         <p className="error-sub text-muted mt-2">

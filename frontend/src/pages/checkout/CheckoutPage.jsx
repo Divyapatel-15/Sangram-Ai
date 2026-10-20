@@ -5,6 +5,7 @@ import { useToast } from '../../context/ToastContext';
 import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
 import { Input } from '../../components/common/Input';
+import { Logo } from '../../components/common/Logo';
 
 export const CheckoutPage = () => {
   const [searchParams] = useSearchParams();
@@ -57,16 +58,10 @@ export const CheckoutPage = () => {
   return (
     <div className="checkout-page-view">
       <div className="checkout-top-header">
-        <Link to="/home" className="brand-logo">
-          <div className="brand-mark">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#00D9FF" strokeWidth="2"/>
-              <path d="M2 17L12 22L22 17" stroke="#4388FF" strokeWidth="2"/>
-              <path d="M2 12L12 17L22 12" stroke="#00D9FF" strokeWidth="2"/>
-            </svg>
-          </div>
-          <span className="brand-name">Sangram<span className="brand-accent">AI</span> Checkout</span>
-        </Link>
+        <div className="flex items-center gap-3">
+          <Logo size="md" href="/home" />
+          <span className="checkout-pill-badge">Secure Checkout</span>
+        </div>
         <button type="button" className="cancel-checkout-link" onClick={handleCancel}>
           Cancel & Return
         </button>

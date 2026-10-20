@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Button } from '../components/common/Button';
+import { Logo } from '../components/common/Logo';
 
 export const PublicLayout = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -22,16 +23,7 @@ export const PublicLayout = () => {
       {/* Main Public Navigation */}
       <header className="public-nav-header">
         <div className="nav-container">
-          <Link to="/home" className="brand-logo" aria-label="Sangram AI Home">
-            <div className="brand-mark">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#00D9FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M2 17L12 22L22 17" stroke="#4388FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M2 12L12 17L22 12" stroke="#00D9FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <span className="brand-name">Sangram<span className="brand-accent">AI</span></span>
-          </Link>
+          <Logo size="md" href="/home" />
 
           {/* Desktop Navigation Links */}
           <nav className="desktop-nav-links" aria-label="Primary navigation">
@@ -94,16 +86,7 @@ export const PublicLayout = () => {
         <div className="footer-container">
           <div className="footer-grid">
             <div className="footer-col brand-col">
-              <Link to="/home" className="brand-logo footer-logo">
-                <div className="brand-mark">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#00D9FF" strokeWidth="2"/>
-                    <path d="M2 17L12 22L22 17" stroke="#4388FF" strokeWidth="2"/>
-                    <path d="M2 12L12 17L22 12" stroke="#00D9FF" strokeWidth="2"/>
-                  </svg>
-                </div>
-                <span className="brand-name">Sangram<span className="brand-accent">AI</span></span>
-              </Link>
+              <Logo size="md" href="/home" className="footer-logo" />
               <p className="footer-tagline">Different Minds. One Arena.</p>
               <p className="footer-bio">
                 An AI workspace where users select multiple models, compare their reasoning and critiques, and review one consolidated final answer.

@@ -32,6 +32,7 @@ import { RefundPolicyPage } from './pages/public/RefundPolicyPage';
 
 // App / Dashboard Pages
 import { DashboardHome } from './pages/app/DashboardHome';
+import { WarRoomPage } from './pages/app/WarRoomPage';
 import { ArenaNewPage } from './pages/app/ArenaNewPage';
 import { ArenaViewPage } from './pages/app/ArenaViewPage';
 import { HistoryPage } from './pages/app/HistoryPage';
@@ -92,6 +93,8 @@ export default function App() {
             {/* SaaS Dashboard Shell (Wrapped in DashboardLayout) */}
             <Route path="/app" element={<DashboardLayout />}>
               <Route index element={<DashboardHome />} />
+              <Route path="war-room" element={<WarRoomPage />} />
+              <Route path="arena" element={<ArenaNewPage />} />
               <Route path="arena/new" element={<ArenaNewPage />} />
               <Route path="arena/:id" element={<ArenaViewPage />} />
               <Route path="history" element={<HistoryPage />} />
@@ -102,6 +105,7 @@ export default function App() {
               <Route path="billing/manage" element={<BillingManagePage />} />
               <Route path="billing/invoices" element={<BillingInvoicesPage />} />
               <Route path="billing/upgrade" element={<BillingUpgradePage />} />
+              <Route path="settings" element={<Navigate to="/app/settings/profile" replace />} />
               <Route path="settings/profile" element={<ProfileSettings />} />
               <Route path="settings/security" element={<SecuritySettings />} />
               <Route path="settings/preferences" element={<PreferencesSettings />} />

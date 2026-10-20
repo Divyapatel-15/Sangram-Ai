@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, Outlet } from 'react-router-dom';
+import { Logo } from '../components/common/Logo';
 
 export const AuthLayout = () => {
   return (
@@ -13,16 +14,7 @@ export const AuthLayout = () => {
 
       {/* Top Header */}
       <header className="auth-header">
-        <Link to="/home" className="brand-logo" aria-label="Back to Sangram AI home">
-          <div className="brand-mark">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#00D9FF" strokeWidth="2"/>
-              <path d="M2 17L12 22L22 17" stroke="#4388FF" strokeWidth="2"/>
-              <path d="M2 12L12 17L22 12" stroke="#00D9FF" strokeWidth="2"/>
-            </svg>
-          </div>
-          <span className="brand-name">Sangram<span className="brand-accent">AI</span></span>
-        </Link>
+        <Logo size="md" href="/home" />
         <div className="auth-header-right">
           <Link to="/home" className="back-home-link">← Return to website</Link>
         </div>

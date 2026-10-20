@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useToast } from '../../context/ToastContext';
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
+import { Logo } from '../../components/common/Logo';
 
 export const ForgotPasswordPage = () => {
   const [email, setEmail] = useState('');
@@ -31,6 +32,9 @@ export const ForgotPasswordPage = () => {
   return (
     <div className="auth-box animate-scale-in">
       <div className="auth-box-header">
+        <div className="flex justify-center mb-3">
+          <Logo size="md" showWordmark={true} href="/home" />
+        </div>
         <h2 className="auth-title">Reset your password</h2>
         <p className="auth-sub">
           Enter your registered email address and we will send you instructions to recover your arena account.

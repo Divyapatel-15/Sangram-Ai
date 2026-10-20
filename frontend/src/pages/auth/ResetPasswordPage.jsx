@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useToast } from '../../context/ToastContext';
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
+import { Logo } from '../../components/common/Logo';
 
 export const ResetPasswordPage = () => {
   const [newPassword, setNewPassword] = useState('');
@@ -36,6 +37,9 @@ export const ResetPasswordPage = () => {
   return (
     <div className="auth-box animate-scale-in">
       <div className="auth-box-header">
+        <div className="flex justify-center mb-3">
+          <Logo size="md" showWordmark={true} href="/home" />
+        </div>
         <h2 className="auth-title">Set new password</h2>
         <p className="auth-sub">Choose a secure password for your Sangram AI workspace account.</p>
       </div>

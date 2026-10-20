@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
+import { Logo } from '../../components/common/Logo';
 
 export const LoginRootPage = () => {
   const [email, setEmail] = useState('demo@sangram.ai');
@@ -60,16 +61,7 @@ export const LoginRootPage = () => {
 
       {/* Top Bar with Brand & Public Website Link */}
       <header className="root-header">
-        <div className="brand-badge-root">
-          <div className="brand-logo-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#00D9FF" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M2 17L12 22L22 17" stroke="#4388FF" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M2 12L12 17L22 12" stroke="#00D9FF" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          <span className="brand-root-text">Sangram<span className="highlight">AI</span></span>
-        </div>
+        <Logo size="md" href="/home" />
 
         <div className="root-header-links">
           <Link to="/home" className="public-home-pill">
@@ -138,6 +130,9 @@ export const LoginRootPage = () => {
         <section className="root-form-stage">
           <div className="login-card-panel animate-reveal-up">
             <div className="form-header">
+              <div className="form-brand-row mb-3">
+                <Logo size="sm" showWordmark={true} href="" />
+              </div>
               <h2 className="form-title">Enter the Arena</h2>
               <p className="form-subtitle">Sign in to your Sangram AI workspace to initiate multi-model debates.</p>
             </div>

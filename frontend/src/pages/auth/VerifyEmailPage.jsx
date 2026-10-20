@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useToast } from '../../context/ToastContext';
 import { Button } from '../../components/common/Button';
+import { Logo } from '../../components/common/Logo';
 
 export const VerifyEmailPage = () => {
   const [code, setCode] = useState(['', '', '', '', '', '']);
@@ -39,7 +40,9 @@ export const VerifyEmailPage = () => {
   return (
     <div className="auth-box animate-scale-in">
       <div className="auth-box-header text-center">
-        <div className="auth-icon-circle">✉</div>
+        <div className="flex justify-center mb-3">
+          <Logo size="md" showWordmark={true} href="/home" />
+        </div>
         <h2 className="auth-title">Verify your email</h2>
         <p className="auth-sub">
           We sent a 6-digit confirmation code to your email. Enter it below to activate your account.

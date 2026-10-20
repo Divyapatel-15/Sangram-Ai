@@ -280,3 +280,72 @@ h1, h2, h3, h4 {
   0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
   40% { transform: translateY(-3px); opacity: 1; }
 }
+
+
+/* ==========================================================================
+   Brand Logo Component & Wordmark Styling
+   ========================================================================== */
+
+.brand-logo-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 0.15s ease;
+}
+
+.brand-logo-link:hover {
+  opacity: 0.95;
+}
+
+.brand-logo-component {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-logo-img {
+  display: block;
+  object-fit: contain;
+  border-radius: 8px;
+  flex-shrink: 0;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s ease;
+}
+
+.brand-logo-link:hover .brand-logo-img,
+.brand-logo-component:hover .brand-logo-img {
+  transform: scale(1.04);
+  filter: drop-shadow(0 0 12px rgba(0, 217, 255, 0.45));
+}
+
+.brand-wordmark {
+  font-family: var(--font-display, var(--font-sans));
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  display: inline-flex;
+  align-items: baseline;
+  line-height: 1;
+}
+
+.brand-accent {
+  color: var(--accent-primary);
+  margin-left: 1px;
+  font-weight: 800;
+}
+
+.checkout-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(0, 217, 255, 0.1);
+  border: 1px solid rgba(0, 217, 255, 0.3);
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--accent-primary);
+}

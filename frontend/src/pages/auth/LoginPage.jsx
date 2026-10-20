@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
+import { Logo } from '../../components/common/Logo';
 
 export const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -48,6 +49,9 @@ export const LoginPage = () => {
   return (
     <div className="auth-box animate-scale-in">
       <div className="auth-box-header">
+        <div className="flex justify-center mb-3">
+          <Logo size="md" showWordmark={true} href="/home" />
+        </div>
         <h2 className="auth-title">Welcome back</h2>
         <p className="auth-sub">Enter your credentials to access the Sangram AI arena.</p>
       </div>

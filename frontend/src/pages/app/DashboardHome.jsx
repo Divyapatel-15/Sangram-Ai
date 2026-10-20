@@ -46,10 +46,10 @@ export const DashboardHome = () => {
       {/* Welcome Hero Banner */}
       <div className="dashboard-welcome-banner">
         <div className="welcome-text-col">
-          <div className="welcome-eyebrow">
+          <Link to="/app/war-room" className="welcome-eyebrow">
             <span className="live-dot"></span>
-            <span>DIALECTIC WAR ROOM ACTIVE</span>
-          </div>
+            <span>DIALECTIC WAR ROOM ACTIVE · ENTER CHAMBER →</span>
+          </Link>
           <h1 className="welcome-heading">
             Welcome back, {user?.name || 'Explorer'}
           </h1>
@@ -58,8 +58,13 @@ export const DashboardHome = () => {
           </p>
         </div>
 
-        <div className="welcome-cta-col">
-          <Link to="/app/arena/new">
+        <div className="welcome-cta-col flex items-center gap-3">
+          <Link to="/app/war-room">
+            <Button variant="secondary" size="lg" icon="🕸">
+              Live War Room
+            </Button>
+          </Link>
+          <Link to="/app/arena">
             <Button variant="primary" size="lg" icon="⚔">
               Start New Battle
             </Button>
@@ -129,7 +134,7 @@ export const DashboardHome = () => {
               <Card className="empty-card text-center py-8">
                 <p className="text-muted">No battles recorded yet. Launch your first arena session!</p>
                 <div className="mt-4">
-                  <Link to="/app/arena/new">
+                  <Link to="/app/arena">
                     <Button variant="primary" size="sm">Start Battle</Button>
                   </Link>
                 </div>
@@ -236,7 +241,7 @@ export const DashboardHome = () => {
               {models.map((m) => (
                 <Link
                   key={m.id}
-                  to={`/app/arena/new?model=${m.id}`}
+                  to={`/app/arena?model=${m.id}`}
                   className="roster-item-pill"
                   style={{ '--border-accent': m.accent.color }}
                 >

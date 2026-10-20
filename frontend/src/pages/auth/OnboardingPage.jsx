@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { Button } from '../../components/common/Button';
+import { Logo } from '../../components/common/Logo';
 import { models } from '../../data/models';
 import { archetypes } from '../../data/archetypes';
 
@@ -43,6 +44,10 @@ export const OnboardingPage = () => {
 
   return (
     <div className="onboarding-card animate-scale-in">
+      <div className="flex justify-center mb-6">
+        <Logo size="md" showWordmark={true} href="/home" />
+      </div>
+
       <div className="onboarding-progress-bar">
         <div className={`step-dot ${step >= 1 ? 'active' : ''}`}>1</div>
         <div className="step-line"></div>

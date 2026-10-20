@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/common/Button';
+import { Logo } from '../components/common/Logo';
 
 export const DashboardLayout = () => {
   const { user, logout } = useAuth();
@@ -21,8 +22,10 @@ export const DashboardLayout = () => {
     if (parts.length <= 1) return 'Workspace / Dashboard';
     const sub = parts[1];
     switch (sub) {
+      case 'war-room':
+        return 'Chamber / Live War Room';
       case 'arena':
-        return 'War Room / Dialectic Arena';
+        return 'Combat / AI Arena';
       case 'history':
         return 'Workspace / Battle History';
       case 'saved':
@@ -32,7 +35,7 @@ export const DashboardLayout = () => {
       case 'usage':
         return 'Analytics / Token Usage';
       case 'billing':
-        return 'Billing / Subscription & Invoices';
+        return 'Billing / Subscription & Plans';
       case 'settings':
         return 'Settings / Account & Preferences';
       default:
@@ -56,19 +59,7 @@ export const DashboardLayout = () => {
         <div className="sidebar-inner">
           {/* Brand Header */}
           <div className="sidebar-brand">
-            <Link to="/home" className="brand-logo" onClick={() => setSidebarOpen(false)}>
-              <div className="brand-mark">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#00D9FF" strokeWidth="2"/>
-                  <path d="M2 17L12 22L22 17" stroke="#4388FF" strokeWidth="2"/>
-                  <path d="M2 12L12 17L22 12" stroke="#00D9FF" strokeWidth="2"/>
-                </svg>
-              </div>
-              <div className="brand-titles">
-                <span className="brand-name">Sangram<span className="brand-accent">AI</span></span>
-                <span className="brand-sub">Different Minds. One Arena.</span>
-              </div>
-            </Link>
+            <Logo size="md" href="/home" />
             <button
               className="sidebar-close-btn"
               onClick={() => setSidebarOpen(false)}
@@ -80,7 +71,7 @@ export const DashboardLayout = () => {
 
           {/* New Battle Quick Action */}
           <div className="sidebar-cta-block">
-            <Link to="/app/arena/new" onClick={() => setSidebarOpen(false)} className="w-full">
+            <Link to="/app/arena" onClick={() => setSidebarOpen(false)} className="w-full">
               <Button variant="primary" className="new-battle-btn w-full" icon="⚔">
                 New Battle
               </Button>
@@ -103,13 +94,22 @@ export const DashboardLayout = () => {
               <span className="nav-group-title">Arena Chamber</span>
               <nav className="sidebar-nav">
                 <NavLink
-                  to="/app/arena/new"
+                  to="/app/war-room"
                   onClick={() => setSidebarOpen(false)}
                   className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
                 >
                   <span className="link-icon">⚔</span>
-                  <span className="link-text">War Room Arena</span>
+                  <span className="link-text">War Room</span>
                   <span className="link-badge-live">LIVE</span>
+                </NavLink>
+
+                <NavLink
+                  to="/app/arena"
+                  onClick={() => setSidebarOpen(false)}
+                  className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+                >
+                  <span className="link-icon">⚡</span>
+                  <span className="link-text">AI Arena</span>
                 </NavLink>
 
                 <NavLink
@@ -161,7 +161,7 @@ export const DashboardLayout = () => {
                   className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
                 >
                   <span className="link-icon">📈</span>
-                  <span className="link-text">Usage & Tokens</span>
+                  <span className="link-text">User Tokens</span>
                 </NavLink>
 
                 <NavLink
@@ -170,7 +170,7 @@ export const DashboardLayout = () => {
                   className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
                 >
                   <span className="link-icon">💳</span>
-                  <span className="link-text">Billing & Plans</span>
+                  <span className="link-text">Billing Plans</span>
                 </NavLink>
 
                 <NavLink
