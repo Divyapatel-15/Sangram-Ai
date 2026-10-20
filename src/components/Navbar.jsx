@@ -35,6 +35,7 @@ export default function Navbar({ view, onNavigate, onHome, onEnter }) {
   const links = (
     <>
       <a href="#top" onClick={(e) => { e.preventDefault(); setOpen(false); onHome() }}>Home</a>
+      <a href="#about" onClick={(e) => { e.preventDefault(); goSection('#about') }}>About</a>
       <a href="#how" onClick={(e) => { e.preventDefault(); goSection('#how') }}>How It Works</a>
       <a href="#models" onClick={(e) => { e.preventDefault(); goSection('#models') }}>Models</a>
     </>

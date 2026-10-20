@@ -2798,3 +2798,286 @@ section[id] { scroll-margin-top: calc(var(--header-h) + 12px); }
   .results-reveal { opacity: 1 !important; transform: none !important; }
   a[href]::after { content: ''; }
 }
+
+
+/* =========================================================
+   DESIGN UPGRADES — appended after original styles
+   ========================================================= */
+
+/* =========================================================
+   SCROLL REVEAL SYSTEM
+   ========================================================= */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.65s ease, transform 0.65s ease;
+}
+
+[data-reveal].is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1; transform: none; transition: none; }
+}
+
+/* =========================================================
+   HERO ENHANCEMENTS
+   ========================================================= */
+
+/* Pulsing dot on eyebrow */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0, 217, 255, 0.4); }
+  50%       { opacity: 0.7; box-shadow: 0 0 0 5px rgba(0, 217, 255, 0); }
+}
+
+.eyebrow-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  flex-shrink: 0;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* Hero radial glow */
+.hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 900px;
+  height: 600px;
+  background: radial-gradient(ellipse at center, rgba(0, 217, 255, 0.05) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-grid {
+  position: relative;
+  z-index: 1;
+}
+
+/* Hero entrance animations */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes hero-fade-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-eyebrow {
+    animation: hero-fade-up 0.6s ease 0.05s both;
+  }
+  .hero h1 {
+    animation: hero-fade-up 0.7s ease 0.15s both;
+  }
+  .hero .hero-sub {
+    animation: hero-fade-up 0.7s ease 0.25s both;
+  }
+  .hero .hero-actions {
+    animation: hero-fade-up 0.7s ease 0.35s both;
+  }
+  .hero .hero-proto-label {
+    animation: hero-fade-up 0.6s ease 0.45s both;
+  }
+}
+
+/* =========================================================
+   ARENA VISUAL ANIMATIONS
+   ========================================================= */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes slide-in-left {
+    from { opacity: 0; transform: translateX(-28px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes slide-in-right {
+    from { opacity: 0; transform: translateX(28px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes vs-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(0, 217, 255, 0); }
+    50%       { box-shadow: 0 0 0 8px rgba(0, 217, 255, 0.12); }
+  }
+
+  .arena-fighter--a {
+    animation: slide-in-left 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+  }
+  .arena-fighter--b {
+    animation: slide-in-right 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
+  }
+  .arena-vs-node {
+    animation: vs-pulse 2.4s ease-in-out infinite;
+  }
+}
+
+/* =========================================================
+   BUTTON HOVER ENHANCEMENTS
+   ========================================================= */
+.btn-primary {
+  transition: background-color 0.15s ease, border-color 0.15s ease,
+              color 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
+}
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 217, 255, 0.22);
+}
+.btn-secondary:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+/* =========================================================
+   BENEFIT CARDS — enhanced hover
+   ========================================================= */
+.benefit-card {
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+.benefit-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), 0 0 0 1px var(--border-strong);
+}
+
+/* =========================================================
+   MODEL SHOWCASE — hover glow
+   ========================================================= */
+.showcase-item {
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+.showcase-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 14px var(--mc-soft, rgba(0, 217, 255, 0.08));
+}
+
+/* =========================================================
+   CTA SURFACE — radial glow
+   ========================================================= */
+.cta-surface {
+  position: relative;
+  overflow: hidden;
+}
+.cta-surface::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 700px;
+  height: 400px;
+  background: radial-gradient(ellipse at center, rgba(0, 217, 255, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* =========================================================
+   ABOUT SECTION
+   ========================================================= */
+.section-about {
+  padding: var(--space-24) 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-16);
+  align-items: center;
+}
+
+.section-about h2 {
+  margin: var(--space-3) 0 var(--space-5);
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+}
+
+.about-lead {
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-4);
+}
+
+.about-vision {
+  display: flex;
+  justify-content: center;
+}
+
+.about-vision-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--accent-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8);
+  max-width: 380px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 24px rgba(0, 217, 255, 0.04);
+}
+
+.about-vision-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-primary);
+  display: block;
+  margin-bottom: var(--space-4);
+}
+
+.about-vision-card blockquote {
+  font-size: 18px;
+  font-style: italic;
+  color: var(--text-primary);
+  line-height: 1.55;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .about-grid { grid-template-columns: 1fr; }
+  .about-vision { justify-content: flex-start; }
+  .about-vision-card { max-width: 100%; }
+}
+
+/* =========================================================
+   FOOTER — GitHub link
+   ========================================================= */
+.footer-github-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-top: var(--space-2);
+  transition: color 0.15s ease;
+}
+.footer-github-link:hover { color: var(--text-primary); }
+
+/* =========================================================
+   SECTION HEAD EYEBROW DOT SPACING
+   ========================================================= */
+.section-head .eyebrow,
+.section-head-split .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* =========================================================
+   HOW-IT-WORKS — step num accent
+   ========================================================= */
+.how-num {
+  color: var(--accent-primary);
+}
+
+/* =========================================================
+   USE CASE CARDS — hover effect
+   ========================================================= */
+.usecase-card {
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.usecase-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-strong);
+}

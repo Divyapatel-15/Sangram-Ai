@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { models, accentVars } from '../data/models'
 import {
   BrandLogo,
@@ -12,13 +12,33 @@ import {
   IconStepAnswer,
   IconArrowRight,
   IconInfo,
-  IconContention,       
+  IconContention,
   IconHistory
 } from './Icons'
 
-/* ------------------------------------------------------------------ */
-/* Hero + custom arena visualization                                   */
-/* ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------
+   Scroll-reveal hook — IntersectionObserver, no deps
+   ------------------------------------------------------------------ */
+function useReveal() {
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.querySelectorAll('[data-reveal]').forEach(el => el.classList.add('is-revealed'))
+      return
+    }
+    const obs = new IntersectionObserver(
+      (entries) => entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('is-revealed'); obs.unobserve(e.target) }
+      }),
+      { threshold: 0.12 }
+    )
+    document.querySelectorAll('[data-reveal]').forEach(el => obs.observe(el))
+    return () => obs.disconnect()
+  }, [])
+}
+
+/* ------------------------------------------------------------------
+   Hero + custom arena visualization
+   ------------------------------------------------------------------ */
 
 function ArenaVisual() {
   const a = models[0] // ChatGPT
@@ -35,7 +55,7 @@ function ArenaVisual() {
       </div>
 
       <div className="arena-combatants">
-        <div className="arena-fighter" style={accentVars(a)}>
+        <div className="arena-fighter arena-fighter--a" style={accentVars(a)}>
           <div className="arena-fighter-top">
             <span className="fighter-slot-tag">FIGHTER 01</span>
             <span className="fighter-live-dot" aria-hidden="true" />
@@ -56,7 +76,7 @@ function ArenaVisual() {
           <span className="arena-vs-line" />
         </div>
 
-        <div className="arena-fighter" style={accentVars(b)}>
+        <div className="arena-fighter arena-fighter--b" style={accentVars(b)}>
           <div className="arena-fighter-top">
             <span className="fighter-slot-tag">FIGHTER 02</span>
             <span className="fighter-live-dot" aria-hidden="true" />
@@ -100,10 +120,14 @@ function Hero({ onEnter, onHowItWorks }) {
     <section className="hero" id="top">
       <div className="container hero-grid">
         <div className="hero-copy">
-          <p className="hero-eyebrow">DIFFERENT MINDS. ONE ARENA.</p>
+          <p className="hero-eyebrow">
+            <span className="eyebrow-dot" aria-hidden="true" />
+            DIFFERENT MINDS. ONE ARENA.
+          </p>
           <h1>What Happens When AI&nbsp;Challenges AI?</h1>
           <p className="hero-sub">
-            Choose your AI models. Watch them challenge each other's reasoning. Get one consolidated final answer.
+            Bring different AI models into one arena. Compare their reasoning,
+            challenge their answers, and discover one consolidated response.
           </p>
           <div className="hero-actions">
             <button type="button" className="btn-primary btn-lg" onClick={onEnter}>
@@ -111,7 +135,7 @@ function Hero({ onEnter, onHowItWorks }) {
               <IconArrowRight size={16} />
             </button>
             <button type="button" className="btn-secondary btn-lg" onClick={onHowItWorks}>
-              <span>How It Works</span>
+              <span>Explore How It Works</span>
             </button>
           </div>
           <p className="hero-proto-label">
@@ -125,9 +149,45 @@ function Hero({ onEnter, onHowItWorks }) {
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Example debate preview — clearly marked demonstration data          */
-/* ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------
+   About section
+   ------------------------------------------------------------------ */
+
+function About() {
+  return (
+    <section className="section-about" id="about" aria-labelledby="about-h">
+      <div className="container">
+        <div className="about-grid">
+          <div data-reveal>
+            <p className="eyebrow"><span className="eyebrow-dot" aria-hidden="true" />WHAT IS SANGRAM AI</p>
+            <h2 id="about-h">A New Way to Work With AI</h2>
+            <p className="about-lead">
+              Sangram AI explores what happens when you bring multiple AI perspectives into one arena.
+              Instead of asking one model and accepting its answer, you pit different minds against each
+              other and watch the reasoning unfold.
+            </p>
+            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+              The word "Sangram" (संग्राम) means battle or contest in Sanskrit — a deliberate collision
+              of ideas that produces something stronger than either input alone.
+            </p>
+          </div>
+          <div className="about-vision" data-reveal>
+            <div className="about-vision-card">
+              <span className="about-vision-label">THE VISION</span>
+              <blockquote>
+                "Better answers come from adversarial clarity, not chatbot noise."
+              </blockquote>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ------------------------------------------------------------------
+   Example debate preview
+   ------------------------------------------------------------------ */
 
 const EXAMPLE_TURNS = [
   {
@@ -153,7 +213,7 @@ function ExampleDebate({ onEnter }) {
   return (
     <section className="section-example" aria-labelledby="example-h">
       <div className="container">
-        <div className="section-head">
+        <div className="section-head" data-reveal>
           <p className="eyebrow">DEBATE IN MOTION</p>
           <h2 id="example-h">What a round actually looks like</h2>
           <p>
@@ -161,7 +221,7 @@ function ExampleDebate({ onEnter }) {
           </p>
         </div>
 
-        <div className="example-card">
+        <div className="example-card" data-reveal>
           <div className="example-flag">
             <IconInfo size={13} />
             <span>Demonstration data — curated example, not generated by live APIs</span>
@@ -206,9 +266,9 @@ function ExampleDebate({ onEnter }) {
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Landing composition                                                 */
-/* ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------
+   Landing composition
+   ------------------------------------------------------------------ */
 
 const BENEFITS = [
   {
@@ -243,22 +303,27 @@ const USE_CASES = [
 ]
 
 export default function Landing({ onEnter, onOpenHistory }) {
+  useReveal()
+
   const scrollTo = (sel) => document.querySelector(sel)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
   return (
     <main id="main">
       <Hero onEnter={onEnter} onHowItWorks={() => scrollTo('#how')} />
 
+      {/* About */}
+      <About />
+
       {/* Benefits */}
       <section className="section-benefits" id="benefits" aria-labelledby="benefits-h">
         <div className="container">
-          <div className="section-head">
-            <p className="eyebrow">WHY SANGRAM</p>
+          <div className="section-head" data-reveal>
+            <p className="eyebrow"><span className="eyebrow-dot" aria-hidden="true" />WHY SANGRAM</p>
             <h2 id="benefits-h">Adversarial clarity, not chatbot noise</h2>
           </div>
           <div className="benefit-grid">
             {BENEFITS.map((b, i) => (
-              <article key={b.title} className="benefit-card">
+              <article key={b.title} className="benefit-card" data-reveal>
                 <span className="benefit-icon" aria-hidden="true">{b.icon}</span>
                 <h3><span className="benefit-num" aria-hidden="true">0{i + 1}</span>{b.title}</h3>
                 <p>{b.desc}</p>
@@ -271,14 +336,14 @@ export default function Landing({ onEnter, onOpenHistory }) {
       {/* How it works */}
       <section className="section-how" id="how" aria-labelledby="how-h">
         <div className="container">
-          <div className="section-head">
-            <p className="eyebrow">DEBATE PROTOCOL</p>
+          <div className="section-head" data-reveal>
+            <p className="eyebrow"><span className="eyebrow-dot" aria-hidden="true" />DEBATE PROTOCOL</p>
             <h2 id="how-h">How It Works</h2>
             <p>A linear four-stage journey from model selection to one synthesized conclusion.</p>
           </div>
           <ol className="how-grid">
             {HOW_STEPS.map((s) => (
-              <li key={s.num} className="how-step">
+              <li key={s.num} className="how-step" data-reveal>
                 <span className="how-icon" aria-hidden="true">{s.icon}</span>
                 <span className="how-num">{s.num}</span>
                 <h3>{s.title}</h3>
@@ -289,12 +354,12 @@ export default function Landing({ onEnter, onOpenHistory }) {
         </div>
       </section>
 
-      {/* Compact model showcase */}
+      {/* Model showcase */}
       <section className="section-showcase" id="models" aria-labelledby="models-h">
         <div className="container">
-          <div className="section-head section-head-split">
+          <div className="section-head section-head-split" data-reveal>
             <div>
-              <p className="eyebrow">MODEL ROSTER</p>
+              <p className="eyebrow"><span className="eyebrow-dot" aria-hidden="true" />MODEL ROSTER</p>
               <h2 id="models-h">Six profiles, any pairing</h2>
               <p>Simulated fighter profiles with distinct reasoning personas. Identifiers are for display only — no live APIs are connected.</p>
             </div>
@@ -305,7 +370,7 @@ export default function Landing({ onEnter, onOpenHistory }) {
           </div>
           <div className="showcase-grid">
             {models.map((m) => (
-              <div key={m.id} className="showcase-item" style={accentVars(m)}>
+              <div key={m.id} className="showcase-item" style={accentVars(m)} data-reveal>
                 <ModelIcon id={m.id} size={34} />
                 <div className="showcase-item-body">
                   <strong>{m.name}</strong>
@@ -328,13 +393,13 @@ export default function Landing({ onEnter, onOpenHistory }) {
       {/* Use cases */}
       <section className="section-usecases" aria-labelledby="use-h">
         <div className="container">
-          <div className="section-head">
-            <p className="eyebrow">BUILT FOR DECISIONS</p>
+          <div className="section-head" data-reveal>
+            <p className="eyebrow"><span className="eyebrow-dot" aria-hidden="true" />BUILT FOR DECISIONS</p>
             <h2 id="use-h">Where a debate beats a single answer</h2>
           </div>
           <div className="usecase-grid">
             {USE_CASES.map((u) => (
-              <article key={u.title} className="usecase-card">
+              <article key={u.title} className="usecase-card" data-reveal>
                 <h3>{u.title}</h3>
                 <p>{u.desc}</p>
               </article>
@@ -346,7 +411,7 @@ export default function Landing({ onEnter, onOpenHistory }) {
       {/* Final CTA */}
       <section className="section-cta" aria-labelledby="cta-h">
         <div className="container">
-          <div className="cta-surface">
+          <div className="cta-surface" data-reveal>
             <div>
               <h2 id="cta-h">Ready to put two AI perspectives to the test?</h2>
               <p>Select two models, enter one question, and review the full four-round debate alongside a single synthesized answer.</p>
@@ -398,18 +463,10 @@ function Footer({ onEnter, onOpenHistory }) {
 
         <nav className="footer-col" aria-label="Footer navigation">
           <h3>Platform</h3>
-          <a href="#benefits" onClick={(e) => {
-            e.preventDefault()
-            scrollTo('#benefits')
-          }}>Why Sangram</a>
-          <a href="#how" onClick={(e) => {
-            e.preventDefault()
-            scrollTo('#how')
-          }}>How It Works</a>
-          <a href="#models" onClick={(e) => {
-            e.preventDefault()
-            scrollTo('#models')
-          }}>Model Roster</a>
+          <a href="#about" onClick={(e) => { e.preventDefault(); scrollTo('#about') }}>About Sangram</a>
+          <a href="#benefits" onClick={(e) => { e.preventDefault(); scrollTo('#benefits') }}>Why Sangram</a>
+          <a href="#how" onClick={(e) => { e.preventDefault(); scrollTo('#how') }}>How It Works</a>
+          <a href="#models" onClick={(e) => { e.preventDefault(); scrollTo('#models') }}>Model Roster</a>
           <button type="button" className="footer-link-btn" onClick={onEnter}>
             Enter the Arena
           </button>
@@ -436,6 +493,19 @@ function Footer({ onEnter, onOpenHistory }) {
             WhatsApp: +91 78229 02947
           </a>
 
+          <a
+            className="footer-github-link"
+            href="https://github.com/Nickroy07/Sangram-Ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Sangram AI source code on GitHub"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.341-3.369-1.341-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/>
+            </svg>
+            GitHub
+          </a>
+
           <p className="footer-note">
             For demo feedback and partnership enquiries.
           </p>
@@ -451,5 +521,3 @@ function Footer({ onEnter, onOpenHistory }) {
     </footer>
   )
 }
-
-  
