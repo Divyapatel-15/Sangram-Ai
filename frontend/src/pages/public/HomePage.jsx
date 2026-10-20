@@ -54,9 +54,23 @@ export const HomePage = () => {
 
   return (
     <div className="home-page-view">
-      {/* SECTION 1: Clean, Focused Hero */}
-      <section className="home-hero-section">
-        <div className="hero-ambient-glow" aria-hidden="true"></div>
+      {/* SECTION 1: Restored Motion Series Hero with Looping Fibre-Optic Light Video & Glassmorphism */}
+      <section className="home-hero-section hero" id="top">
+        {/* Looping Fibre-Optic Light-Painting Video Background */}
+        <video
+          className="hero-art-video"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          aria-hidden="true"
+          poster="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/130837c4-0244-4f37-9c61-8d801d93fd29.jpg"
+          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260912_104303_0c6d60b2-9353-408e-9449-585108a22fb5.mp4"
+        />
+
+        {/* Motion Series Multi-Gradient Veil for High-Contrast Text Legibility */}
+        <div className="hero-veil" aria-hidden="true" />
 
         <div className="hero-content-container">
           <div className="hero-badge">
@@ -77,20 +91,42 @@ export const HomePage = () => {
             Bring different AI models into one arena. Compare their reasoning, challenge their answers, and discover one consolidated response.
           </p>
 
+          {/* Motion Series Glassmorphism CTA Actions */}
           <div className="hero-actions-row">
             <Link to="/app/arena">
-              <Button variant="primary" size="lg" className="hero-primary-btn" icon="⚔">
-                Enter the Arena
-              </Button>
+              <button type="button" className="btn btn-primary btn-lg btn-glass-cta hero-primary-btn">
+                <span>Enter the Arena</span>
+                <span className="btn-icon">⚔</span>
+              </button>
             </Link>
             <a href="#how-it-works">
-              <Button variant="outline" size="lg" className="hero-secondary-btn">
-                Explore How It Works ↓
-              </Button>
+              <button type="button" className="btn btn-secondary btn-lg hero-secondary-btn">
+                <span>Explore How It Works ↓</span>
+              </button>
             </a>
           </div>
 
-          <div className="hero-trust-row">
+          {/* Prototype Badge & Direct Link to Standalone NEURAL Template */}
+          <div className="hero-meta-row">
+            <span className="hero-proto-label">
+              <span className="demo-dot" aria-hidden="true" />
+              Demo Mode · Simulated responses — frontend prototype
+            </span>
+            <a
+              href="/neural-landing.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="neural-link-pill"
+              title="Open the standalone Motion Series / NEURAL template"
+            >
+              <span>NEURAL Template</span>
+              <svg width="11" height="10" viewBox="0 0 10 9" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
+                <path d="M0 4.5 H9.1 M5.4 0.9 L9.2 4.5 L5.4 8.1"/>
+              </svg>
+            </a>
+          </div>
+
+          <div className="hero-trust-row mt-6">
             <span className="trust-label">Compatible with leading foundational model profiles:</span>
             <div className="trust-model-chips">
               <span className="t-chip">ChatGPT</span>

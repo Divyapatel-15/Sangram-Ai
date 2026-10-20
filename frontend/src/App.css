@@ -3159,6 +3159,15 @@ section[id] { scroll-margin-top: calc(var(--header-h) + 12px); }
 .btn-glass-cta {
   border-radius: 999px;
   position: relative;
+  color: #F5F8FF !important;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: 0 1.85rem;
+  height: 50px;
+  text-decoration: none;
   background:
     linear-gradient(180deg, rgba(6, 12, 22, 0) 45%, rgba(6, 12, 22, .18) 78%, rgba(6, 12, 22, .38) 100%),
     linear-gradient(90deg,
@@ -3175,6 +3184,8 @@ section[id] { scroll-margin-top: calc(var(--header-h) + 12px); }
     0 0 34px rgba(0, 217, 255, .26),
     inset 0 1px 0 0 rgba(255, 251, 242, .55);
   border: 1px solid rgba(0, 217, 255, 0.45);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .btn-glass-cta:hover:not(:disabled) {
   box-shadow:
