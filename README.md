@@ -11,7 +11,7 @@ shared timeline, and receive a single synthesized final answer.
 
 ## Project Structure
 
-All frontend application files are consolidated under the `frontend/` directory:
+All application source code, components, styles, documentation, and assets are inside the `frontend/` folder:
 
 ```text
 sangram-ai/
@@ -25,37 +25,30 @@ sangram-ai/
 │   │   ├── App.css               # Component & motion styles
 │   │   └── main.jsx              # React DOM entry
 │   ├── public/                   # Static assets (logo, favicon)
+│   ├── docs/                     # Backend contracts & architecture documentation
 │   ├── index.html                # Entry HTML
 │   ├── vite.config.js            # Vite configuration
 │   └── package.json              # Frontend dependencies
-├── docs/                         # Backend contracts & architecture documentation
-└── package.json                  # Root workspace runner scripts
+└── README.md                     # Project overview
 ```
 
 ## Run Locally
 
-You can run commands from the **repo root**:
-
 ```bash
-# Install frontend dependencies
-npm --prefix frontend install
+# 1. Navigate to the frontend directory
+cd frontend
 
-# Start local dev server (http://localhost:5173 or 3000)
+# 2. Install dependencies
+npm install
+
+# 3. Start local development server
 npm run dev
 
-# Build production bundle (outputs to frontend/dist/)
+# 4. Build for production
 npm run build
 
-# Preview build
+# 5. Preview the production build
 npm run preview
-```
-
-Or directly inside the `frontend/` folder:
-
-```bash
-cd frontend
-npm install
-npm run dev
 ```
 
 ## Branding

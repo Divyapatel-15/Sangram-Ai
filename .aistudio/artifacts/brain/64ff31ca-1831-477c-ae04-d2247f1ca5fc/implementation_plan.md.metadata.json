@@ -1,6 +1,0 @@
-{
-  "summary": "Architectural implementation plan for adding an interactive AI Archetype & Personality selection UI to SANGRAM AI. Configures 6 core debate archetypes (Analytical Logician, Creative Visionary, Pragmatic Realist, Inquisitive Skeptic, Integrative Synthesizer, Bold Provocateur) that pair with base AI models, providing interactive card selectors with traits, badges, and icons, updated fighter slots, and enriched debate timelines.",
-  "updatedAt": "2026-10-20T08:10:45.280782185Z",
-  "requestFeedback": true,
-  "userFacing": true
-}
