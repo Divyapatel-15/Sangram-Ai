@@ -118,6 +118,20 @@ function ArenaVisual() {
 function Hero({ onEnter, onHowItWorks }) {
   return (
     <section className="hero" id="top">
+      {/* Motion Series Video Background & Veil */}
+      <video
+        className="hero-art-video"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+        aria-hidden="true"
+        poster="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/130837c4-0244-4f37-9c61-8d801d93fd29.jpg"
+        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260912_104303_0c6d60b2-9353-408e-9449-585108a22fb5.mp4"
+      />
+      <div className="hero-veil" aria-hidden="true" />
+
       <div className="container hero-grid">
         <div className="hero-copy">
           <p className="hero-eyebrow">
@@ -130,7 +144,7 @@ function Hero({ onEnter, onHowItWorks }) {
             challenge their answers, and discover one consolidated response.
           </p>
           <div className="hero-actions">
-            <button type="button" className="btn-primary btn-lg" onClick={onEnter}>
+            <button type="button" className="btn-primary btn-lg btn-glass-cta" onClick={onEnter}>
               <span>Enter the Arena</span>
               <IconArrowRight size={16} />
             </button>
@@ -138,10 +152,24 @@ function Hero({ onEnter, onHowItWorks }) {
               <span>Explore How It Works</span>
             </button>
           </div>
-          <p className="hero-proto-label">
-            <span className="demo-dot" aria-hidden="true" />
-            Demo Mode · Simulated responses — frontend prototype, no live model APIs
-          </p>
+          <div className="hero-meta-row">
+            <p className="hero-proto-label">
+              <span className="demo-dot" aria-hidden="true" />
+              Demo Mode · Simulated responses — frontend prototype, no live model APIs
+            </p>
+            <a
+              href="/neural-landing.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="neural-link-pill"
+              title="Open the standalone Motion Series / NEURAL template"
+            >
+              <span>NEURAL Template</span>
+              <svg width="11" height="10" viewBox="0 0 10 9" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
+                <path d="M0 4.5 H9.1 M5.4 0.9 L9.2 4.5 L5.4 8.1"/>
+              </svg>
+            </a>
+          </div>
         </div>
         <ArenaVisual />
       </div>
