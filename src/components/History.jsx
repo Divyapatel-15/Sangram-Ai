@@ -74,6 +74,7 @@ export default function History({ entries, onReopen, onEnterArena }) {
                         <span key={f.modelId} className="hi-fighter">
                           <ModelIcon id={f.modelId} size={20} />
                           {f.name}
+                          {f.archetypeName ? <small className="hi-arch"> ({f.archetypeName})</small> : ''}
                           {m ? '' : ' (unknown profile)'}
                         </span>
                       )

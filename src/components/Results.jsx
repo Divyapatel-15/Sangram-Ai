@@ -128,7 +128,9 @@ export default function Results({
               {models.map((m, i) => (
                 <span key={m.id} className="rc-chip" style={accentVars(m)}>
                   <ModelIcon id={m.id} size={22} />
-                  <b>{m.name}</b><small>0{i + 1}</small>
+                  <b>{m.name}</b>
+                  {m.archetype && <span className="rc-arch-badge">· {m.archetype.shortName}</span>}
+                  <small>0{i + 1}</small>
                 </span>
               ))}
             </div>
@@ -180,6 +182,7 @@ export default function Results({
                     <span>
                       <small>FIGHTER 0{i + 1} CONTRIBUTION</small>
                       <strong>{m?.name || 'Model'}</strong>
+                      {m?.archetype && <small className="insight-arch">Persona: {m.archetype.name}</small>}
                     </span>
                   </header>
                   <p>{insights?.[side] || 'No supporting insight recorded for this fighter.'}</p>

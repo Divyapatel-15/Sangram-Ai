@@ -54,7 +54,10 @@ function normalizeEntry(raw) {
       modelId: typeof f?.modelId === 'string' ? f.modelId : 'unknown',
       name: truncate(f?.name, 60) || 'Unknown model',
       provider: truncate(f?.provider, 40) || '—',
-      modelLabel: truncate(f?.modelLabel, 40) || ''
+      modelLabel: truncate(f?.modelLabel, 40) || '',
+      archetypeId: truncate(f?.archetypeId, 30) || (f?.archetype?.id ? truncate(f.archetype.id, 30) : null),
+      archetypeName: truncate(f?.archetypeName, 60) || (f?.archetype?.name ? truncate(f.archetype.name, 60) : null),
+      archetypeTag: truncate(f?.archetypeTag, 60) || (f?.archetype?.tag ? truncate(f.archetype.tag, 60) : null)
     })),
     messages: messages.slice(0, 40).map((m, i) => ({
       id: truncate(m?.id, 20) || `m${i + 1}`,
@@ -65,6 +68,8 @@ function normalizeEntry(raw) {
       modelName: truncate(m?.modelName, 40) || 'Model',
       provider: truncate(m?.provider, 40) || '',
       modelLabel: truncate(m?.modelLabel, 40) || '',
+      archetypeId: truncate(m?.archetypeId, 30) || null,
+      archetypeName: truncate(m?.archetypeName, 60) || null,
       text: truncate(m?.text, MAX_TEXT),
       challenges: m?.challenges || null,
       contention: typeof m?.contention === 'string' ? truncate(m.contention, 400) : null,

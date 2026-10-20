@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { getModelById } from '../data/models'
 import { stages } from '../services/battleService'
-import { ModelIcon, IconReplyTarget, IconContention, IconConverge } from './Icons'
+import { ModelIcon, ArchetypeIcon, IconReplyTarget, IconContention, IconConverge } from './Icons'
 
 const READ_MORE_AT = 430
 
@@ -44,6 +44,12 @@ function MessageItemBase({ msg, streaming = false, text = null, expanded, onTogg
         <header className="msg-meta">
           <span className="msg-fighter">{isA ? 'FIGHTER 01' : 'FIGHTER 02'}</span>
           <strong className="msg-model">{msg.modelName}</strong>
+          {msg.archetypeName && (
+            <span className="msg-arch-chip">
+              <ArchetypeIcon id={msg.archetypeId} size={12} />
+              <span>{msg.archetypeName}</span>
+            </span>
+          )}
           <span className="msg-prov">{msg.provider}{msg.modelLabel ? ` · ${msg.modelLabel}` : ''}</span>
           <span className="msg-stage">{msg.stageLabel}</span>
           {streaming && (

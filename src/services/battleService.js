@@ -23,6 +23,8 @@
  * sequence alone, which is all a live debate timeline genuinely has.
  */
 
+import { defaultArchetypeForModel } from '../data/archetypes'
+
 export const stages = [
   { id: 1, key: 'opening', label: 'Opening Arguments', round: 1, short: 'Open' },
   { id: 2, key: 'counter', label: 'Counterarguments', round: 2, short: 'Counter' },
@@ -420,6 +422,9 @@ export function generateBattle(selectedModels, question) {
   if (!a || !b) throw new Error('Two distinct models are required to generate a battle.')
   if (!question || !question.trim()) throw new Error('A question is required to generate a battle.')
 
+  const archA = a.archetype || defaultArchetypeForModel(a.id)
+  const archB = b.archetype || defaultArchetypeForModel(b.id)
+
   const q = question.toLowerCase()
   const script =
     Object.values(SCRIPTS).find((s) => s.match(q)) || null
@@ -435,6 +440,8 @@ export function generateBattle(selectedModels, question) {
     const isA = m.speaker === 'A'
     const cur = isA ? a : b
     const opp = isA ? b : a
+    const curArch = isA ? archA : archB
+    const oppArch = isA ? archB : archA
     const st = stageForRound(m.round)
     return {
       id: `m${i + 1}`,
@@ -448,7 +455,13 @@ export function generateBattle(selectedModels, question) {
       provider: cur.provider,
       modelLabel: cur.modelLabel,
       accent: cur.accent,
+      archetypeId: curArch.id,
+      archetypeName: curArch.name,
+      archetypeShort: curArch.shortName,
+      archetypeTag: curArch.tag,
+      archetypeMotto: curArch.motto,
       opponentName: opp.name,
+      opponentArchetypeName: oppArch.name,
       text: m.text,
       challenges: m.challenges || m.addressing || null,
       contention: m.contention || null,
@@ -460,15 +473,37 @@ export function generateBattle(selectedModels, question) {
     id: `b-${Date.now().toString(36)}`,
     question: question.trim(),
     fighters: [
-      { slot: 0, modelId: a.id, name: a.name, provider: a.provider, modelLabel: a.modelLabel },
-      { slot: 1, modelId: b.id, name: b.name, provider: b.provider, modelLabel: b.modelLabel }
+      {
+        slot: 0,
+        modelId: a.id,
+        name: a.name,
+        provider: a.provider,
+        modelLabel: a.modelLabel,
+        archetypeId: archA.id,
+        archetypeName: archA.name,
+        archetypeShort: archA.shortName,
+        archetypeTag: archA.tag,
+        archetype: archA
+      },
+      {
+        slot: 1,
+        modelId: b.id,
+        name: b.name,
+        provider: b.provider,
+        modelLabel: b.modelLabel,
+        archetypeId: archB.id,
+        archetypeName: archB.name,
+        archetypeShort: archB.shortName,
+        archetypeTag: archB.tag,
+        archetype: archB
+      }
     ],
     messages,
     roundSummaries,
     finalAnswer,
     insights: {
-      a: insightTpl.a.replaceAll('{A}', a.name),
-      b: insightTpl.b.replaceAll('{B}', b.name).replaceAll('{A}', a.name)
+      a: insightTpl.a.replaceAll('{A}', `${a.name} (${archA.name})`),
+      b: insightTpl.b.replaceAll('{B}', `${b.name} (${archB.name})`).replaceAll('{A}', `${a.name} (${archA.name})`)
     },
     agreement: {
       score: agreement,
@@ -482,7 +517,10 @@ export function generateBattle(selectedModels, question) {
 
 /** Deterministic digest used to key shareable demo links and history ids. */
 export function battleFingerprint(selectedModels, question) {
-  const ids = [selectedModels[0]?.id || '', selectedModels[1]?.id || ''].sort().join('|')
+  const ids = [
+    `${selectedModels[0]?.id || ''}:${selectedModels[0]?.archetype?.id || ''}`,
+    `${selectedModels[1]?.id || ''}:${selectedModels[1]?.archetype?.id || ''}`
+  ].sort().join('|')
   const q = (question || '').trim().toLowerCase()
   let h1 = 0x811c9dc5
   const s = ids + '::' + q

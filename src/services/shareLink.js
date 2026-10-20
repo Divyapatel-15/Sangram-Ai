@@ -33,12 +33,14 @@ const dec = (s) => {
 }
 
 /** Returns a compact payload string, or null when it would be too large. */
-export function encodeDemoState({ question, modelIds }) {
+export function encodeDemoState({ question, modelIds, archetypeIds }) {
   if (!question || !Array.isArray(modelIds) || modelIds.length !== 2) return null
   const payload = {
     q: question.slice(0, 1000),
     a: modelIds[0],
-    b: modelIds[1]
+    b: modelIds[1],
+    archA: archetypeIds?.[0] || null,
+    archB: archetypeIds?.[1] || null
   }
   let encoded
   try {
@@ -50,7 +52,7 @@ export function encodeDemoState({ question, modelIds }) {
   return url.length > MAX_URL_CHARS ? null : url
 }
 
-/** Parses ?#demo=... from a hash. Returns { question, modelIds } or null. */
+/** Parses ?#demo=... from a hash. Returns { question, modelIds, archetypeIds } or null. */
 export function decodeDemoHash(hash) {
   try {
     const match = /#demo=([A-Za-z0-9\-_]+)/.exec(hash || '')
@@ -58,7 +60,11 @@ export function decodeDemoHash(hash) {
     const parsed = JSON.parse(dec(match[1]))
     if (typeof parsed?.q !== 'string' || !parsed.q.trim()) return null
     if (typeof parsed.a !== 'string' || typeof parsed.b !== 'string') return null
-    return { question: parsed.q.trim().slice(0, 1000), modelIds: [parsed.a, parsed.b] }
+    return {
+      question: parsed.q.trim().slice(0, 1000),
+      modelIds: [parsed.a, parsed.b],
+      archetypeIds: parsed.archA && parsed.archB ? [parsed.archA, parsed.archB] : null
+    }
   } catch {
     return null // any malformed link is simply ignored
   }

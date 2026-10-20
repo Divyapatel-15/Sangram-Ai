@@ -1,12 +1,17 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { models, examplePrompts, accentVars } from '../data/models'
+import { archetypes, getArchetypeById, defaultArchetypeForModel, archetypeVars } from '../data/archetypes'
+import ArchetypeCatalog from './ArchetypeCatalog'
 import {
   ModelIcon,
+  ArchetypeIcon,
   IconCheck,
   IconArrowRight,
   IconStepSelect,
   IconAlert,
-  IconLightning
+  IconLightning,
+  IconChevronDown,
+  IconPersona
 } from './Icons'
 import { DiagnosticsPanel } from './ErrorStates'
 
@@ -15,9 +20,8 @@ const MIN_LEN = 10
 
 /**
  * Configuration: fighter slots (FIGHTER 01 — VS — FIGHTER 02), shared
- * model catalog, question input. Duplicate selection is impossible by
- * design: catalog entries already assigned are shown as occupied and
- * cannot take the opposing slot.
+ * model catalog, archetype personality catalog, question input.
+ * Duplicate model selection is prevented by design.
  */
 export default function Config({
   selected,
@@ -32,7 +36,7 @@ export default function Config({
 }) {
   const [notice, setNotice] = useState('')
   const [touched, setTouched] = useState(false)
-  const [activeSlot, setActiveSlot] = useState(() => (!selected[0] ? 0 : !selected[1] ? 1 : 0))
+  const [activeSlot, setActiveSlot] = useState(() => (!selected[0]?.id ? 0 : !selected[1]?.id ? 1 : 0))
   const textareaRef = useRef(null)
   const startGuard = useRef(false)
 
@@ -40,7 +44,7 @@ export default function Config({
   // steal focus mid-selection, never on touch-first-load contexts.
   useEffect(() => {
     const wideViewport = window.matchMedia?.('(min-width: 768px)')?.matches ?? true
-    if (selected[0] && selected[1] && !question && textareaRef.current && wideViewport) {
+    if (selected[0]?.id && selected[1]?.id && !question && textareaRef.current && wideViewport) {
       textareaRef.current.focus({ preventScroll: true })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -54,10 +58,32 @@ export default function Config({
     }
     setNotice('')
     const next = [...selected]
-    next[slot] = model
+    const existingArch = next[slot]?.archetype
+    next[slot] = {
+      ...model,
+      archetype: existingArch || defaultArchetypeForModel(model.id)
+    }
     setSelected(next)
-    if (slot === 0 && !next[1]) setActiveSlot(1)
-    if (slot === 1 && !next[0]) setActiveSlot(0)
+    if (slot === 0 && !next[1]?.id) setActiveSlot(1)
+    if (slot === 1 && !next[0]?.id) setActiveSlot(0)
+  }
+
+  const assignArchetype = (archetype, slot) => {
+    setNotice('')
+    const next = [...selected]
+    if (next[slot]) {
+      next[slot] = {
+        ...next[slot],
+        archetype
+      }
+    } else {
+      next[slot] = {
+        id: null,
+        name: null,
+        archetype
+      }
+    }
+    setSelected(next)
   }
 
   const handleCatalog = (model) => {
@@ -68,7 +94,7 @@ export default function Config({
       setNotice(`${model.name} is already FIGHTER 0${slot0 ? '1' : '2'}. Choose a different model for Fighter 0${slot0 ? '2' : '1'}.`)
       return
     }
-    const target = !selected[0] ? 0 : !selected[1] ? 1 : activeSlot
+    const target = !selected[0]?.id ? 0 : !selected[1]?.id ? 1 : activeSlot
     assign(model, target)
   }
 
@@ -81,7 +107,11 @@ export default function Config({
   }
 
   const trimmedLen = question.trim().length
-  const modelsReady = Boolean(selected[0] && selected[1] && selected[0].id !== selected[1].id)
+  const modelsReady = Boolean(
+    selected[0]?.id &&
+    selected[1]?.id &&
+    selected[0].id !== selected[1].id
+  )
   const questionValid = trimmedLen >= MIN_LEN && question.length <= MAX_LEN
   const canStart = modelsReady && questionValid && !starting
 
@@ -101,21 +131,25 @@ export default function Config({
 
   const validation = useMemo(() => {
     if (!modelsReady) {
-      const n = (selected[0] ? 1 : 0) + (selected[1] ? 1 : 0)
+      const n = (selected[0]?.id ? 1 : 0) + (selected[1]?.id ? 1 : 0)
       return { level: 'pending', msg: `Select two different models — ${n} of 2 selected.` }
     }
     if (!touched && trimmedLen === 0) return { level: 'pending', msg: 'Enter a question for the arena (minimum 10 characters).' }
     if (trimmedLen === 0) return { level: 'error', msg: 'A question is required before the battle can start.' }
     if (trimmedLen < MIN_LEN) return { level: 'warn', msg: `Add ${MIN_LEN - trimmedLen} more character${MIN_LEN - trimmedLen === 1 ? '' : 's'} — the question needs at least ${MIN_LEN}.` }
-    return { level: 'ok', msg: `Ready: ${selected[0].name} vs ${selected[1].name}.` }
+    const f1 = selected[0]
+    const f2 = selected[1]
+    const arch1 = f1.archetype?.shortName || 'Standard'
+    const arch2 = f2.archetype?.shortName || 'Standard'
+    return { level: 'ok', msg: `Ready: ${f1.name} (${arch1}) vs ${f2.name} (${arch2}).` }
   }, [modelsReady, selected, trimmedLen, touched])
 
   return (
     <main id="main" className="container config-wrap">
       <header className="config-head">
         <p className="eyebrow">MATCHUP CONFIGURATION</p>
-        <h1>Choose Your Fighters</h1>
-        <p className="config-sub">Two models. Different perspectives. One arena.</p>
+        <h1>Choose Your Fighters & Personalities</h1>
+        <p className="config-sub">Two models. Two distinct debate archetypes. One arena.</p>
       </header>
 
       {sharePrefilled && (
@@ -130,11 +164,25 @@ export default function Config({
       )}
 
       {/* Fighter slots */}
-      <section className="slots-section" aria-label="Selected fighters">
+      <section className="slots-section" aria-label="Selected fighters and archetypes">
         <div className="slots">
-          <FighterSlot slot={0} model={selected[0]} onClear={clearSlot} />
+          <FighterSlot
+            slot={0}
+            fighter={selected[0]}
+            onClear={clearSlot}
+            onSelectArchetype={assignArchetype}
+            onFocusSlot={() => setActiveSlot(0)}
+            isActiveSlot={activeSlot === 0}
+          />
           <div className="vs-divider" aria-hidden="true"><span>VS</span></div>
-          <FighterSlot slot={1} model={selected[1]} onClear={clearSlot} />
+          <FighterSlot
+            slot={1}
+            fighter={selected[1]}
+            onClear={clearSlot}
+            onSelectArchetype={assignArchetype}
+            onFocusSlot={() => setActiveSlot(1)}
+            isActiveSlot={activeSlot === 1}
+          />
         </div>
         {notice && (
           <p className="notice-msg" role="alert">
@@ -144,11 +192,21 @@ export default function Config({
         )}
       </section>
 
-      {/* Shared catalog */}
+      {/* Archetype Personality Catalog */}
+      <ArchetypeCatalog
+        selected={selected}
+        activeSlot={activeSlot}
+        setActiveSlot={setActiveSlot}
+        onSelectArchetype={assignArchetype}
+      />
+
+      {/* Shared Model Catalog */}
       <section className="catalog" aria-labelledby="catalog-h">
         <div className="catalog-header">
-          <h2 id="catalog-h">Model Catalog</h2>
-          <span className="catalog-note">Simulated profiles · select two distinct models</span>
+          <div>
+            <h2 id="catalog-h">Choose Base AI Models</h2>
+            <p className="catalog-note">Select two distinct AI models to anchor each fighter slot</p>
+          </div>
         </div>
         <div className="catalog-grid">
           {models.map((m) => {
@@ -165,7 +223,7 @@ export default function Config({
                 aria-label={
                   assigned
                     ? `${m.name} by ${m.provider}. Currently assigned to ${assigned}. Selecting again will not change this; use Change on that slot.`
-                    : `${m.name} by ${m.provider}, ${m.modelLabel}. Assign to ${!selected[0] ? 'Fighter 01' : !selected[1] ? 'Fighter 02' : `Fighter 0${activeSlot + 1}`}.`
+                    : `${m.name} by ${m.provider}, ${m.modelLabel}. Assign to ${!selected[0]?.id ? 'Fighter 01' : !selected[1]?.id ? 'Fighter 02' : `Fighter 0${activeSlot + 1}`}.`
                 }
               >
                 <span className="mcard-top">
@@ -180,7 +238,7 @@ export default function Config({
                   {assigned ? (
                     <><IconCheck size={13} /><span>Selected · {assigned}</span></>
                   ) : (
-                    <span>Assign to {!selected[0] ? 'Fighter 01' : !selected[1] ? 'Fighter 02' : `Fighter 0${activeSlot + 1}`} <IconArrowRight size={13} /></span>
+                    <span>Assign to {!selected[0]?.id ? 'Fighter 01' : !selected[1]?.id ? 'Fighter 02' : `Fighter 0${activeSlot + 1}`} <IconArrowRight size={13} /></span>
                   )}
                 </span>
               </button>
@@ -189,12 +247,12 @@ export default function Config({
         </div>
       </section>
 
-      {/* Question */}
+      {/* Question Section */}
       <section className="question-section" aria-labelledby="question-h" onKeyDown={onKeyDown}>
         <div className="question-head">
           <div>
             <h2 id="question-h">What Should They Battle Over?</h2>
-            <p>A technical, strategic or open-ended question both models will argue through four rounds.</p>
+            <p>A technical, strategic or open-ended question both models will argue through four rounds with their active personalities.</p>
           </div>
         </div>
 
@@ -260,38 +318,97 @@ export default function Config({
   )
 }
 
-function FighterSlot({ slot, model, onClear }) {
+function FighterSlot({ slot, fighter, onClear, onSelectArchetype, onFocusSlot, isActiveSlot }) {
   const label = `FIGHTER 0${slot + 1}`
+  const model = fighter?.id ? fighter : null
+  const arch = fighter?.archetype
+  const styleVars = model ? { ...accentVars(model), ...(arch ? archetypeVars(arch) : {}) } : (arch ? archetypeVars(arch) : undefined)
+
   return (
-    <div className={`slot ${model ? 'filled' : 'empty'}`} style={model ? accentVars(model) : undefined}>
+    <div
+      className={`slot ${model ? 'filled' : 'empty'} ${isActiveSlot ? 'slot-active-target' : ''}`}
+      style={styleVars}
+      onClick={onFocusSlot}
+    >
       <div className="slot-head">
         <span className="slot-label">{label}</span>
         {model ? (
-          <span className="slot-badge ready"><IconCheck size={11} />Selected</span>
+          <span className="slot-badge ready"><IconCheck size={11} />Model & Persona Ready</span>
+        ) : arch ? (
+          <span className="slot-badge arch-ready"><IconPersona size={11} />Persona Ready · Pick Model</span>
         ) : (
           <span className="slot-badge">Awaiting selection</span>
         )}
       </div>
 
       {model ? (
-        <div className="slot-body chosen">
-          <ModelIcon id={model.id} size={44} />
-          <span className="slot-info">
-            <strong>{model.name}</strong>
-            <small>{model.provider} · {model.modelLabel}</small>
-            <small className="slot-api">{model.apiModel ? `API id: ${model.apiModel}` : 'API id: not connected (simulation)'}</small>
-          </span>
-          <button type="button" className="btn-ghost slot-change" onClick={() => onClear(slot)}>
-            Change
-          </button>
+        <div className="slot-content">
+          <div className="slot-body chosen">
+            <ModelIcon id={model.id} size={44} />
+            <div className="slot-info">
+              <span className="slot-model-line">
+                <strong>{model.name}</strong>
+                <small>{model.provider} · {model.modelLabel}</small>
+              </span>
+              <small className="slot-api">{model.apiModel ? `API id: ${model.apiModel}` : 'API id: not connected (simulation)'}</small>
+            </div>
+            <button
+              type="button"
+              className="btn-ghost slot-change"
+              onClick={(e) => { e.stopPropagation(); onClear(slot) }}
+              title="Change base model"
+            >
+              Change Model
+            </button>
+          </div>
+
+          {/* Persona & Dropdown Selector */}
+          <div className="slot-persona-bar">
+            <div className="slot-persona-info">
+              <span className="slot-persona-kicker">
+                <IconPersona size={11} />
+                <span>ACTIVE DEBATE PERSONA</span>
+              </span>
+              <div className="slot-persona-pill" style={arch ? archetypeVars(arch) : undefined}>
+                {arch && <ArchetypeIcon id={arch.id} size={15} color={arch.accent.color} />}
+                <strong>{arch?.name || 'Standard Logician'}</strong>
+                {arch && <small>· {arch.tag}</small>}
+              </div>
+            </div>
+
+            <div className="slot-persona-picker" onClick={(e) => e.stopPropagation()}>
+              <label htmlFor={`slot-arch-select-${slot}`} className="sr-only">
+                Change debate personality for Fighter 0{slot + 1}
+              </label>
+              <div className="slot-select-wrapper">
+                <select
+                  id={`slot-arch-select-${slot}`}
+                  className="slot-arch-dropdown"
+                  value={arch?.id || ''}
+                  onChange={(e) => onSelectArchetype(getArchetypeById(e.target.value), slot)}
+                >
+                  {archetypes.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.name} ({a.tag})
+                    </option>
+                  ))}
+                </select>
+                <span className="slot-select-arrow" aria-hidden="true">
+                  <IconChevronDown size={14} />
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       ) : (
         <div className="slot-body awaiting">
           <span className="slot-empty-icon" aria-hidden="true"><IconStepSelect size={17} /></span>
-          <span className="slot-info">
+          <div className="slot-info">
             <strong>Select {slot === 0 ? 'first' : 'second'} model</strong>
-            <small>Pick {slot === 0 ? 'a fighter' : 'a different fighter'} from the catalog below</small>
-          </span>
+            <small>
+              {arch ? `Persona: ${arch.name} (${arch.tag}) — pick model from below` : `Pick ${slot === 0 ? 'a fighter' : 'a different fighter'} from the catalog below`}
+            </small>
+          </div>
         </div>
       )}
     </div>

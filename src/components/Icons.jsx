@@ -272,3 +272,77 @@ export const IconLightning = ({ size = 16 }) => (
     <path d="M13 3 5 13.5h5.5L10 21l8-10.5h-5.5L13 3Z" stroke="currentColor" strokeWidth="1.75" strokeLinejoin="round" />
   </svg>
 )
+
+export const IconChevronDown = ({ size = 16 }) => (
+  <svg {...svgProps(size)}>
+    <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+)
+
+export const IconPersona = ({ size = 16 }) => (
+  <svg {...svgProps(size)}>
+    <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="1.75" />
+    <path d="M5.5 21v-2a6.5 6.5 0 0 1 13 0v2" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+  </svg>
+)
+
+/**
+ * Dedicated vector glyphs for the 6 debate archetypes.
+ */
+export function ArchetypeIcon({ id, size = 20, color = 'currentColor' }) {
+  const p = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', 'aria-hidden': true }
+  switch (id) {
+    case 'logician':
+      // Compass / deductive geometric precision
+      return (
+        <svg {...p}>
+          <circle cx="12" cy="5" r="2.2" stroke={color} strokeWidth="1.75" />
+          <path d="M12 7.2v4.8M5.5 20l6.5-8 6.5 8M8 17h8" stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )
+    case 'visionary':
+      // Lateral starburst / radiant perspective
+      return (
+        <svg {...p}>
+          <circle cx="12" cy="12" r="3.5" stroke={color} strokeWidth="1.75" />
+          <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3" stroke={color} strokeWidth="1.75" strokeLinecap="round" />
+          <path d="m5.3 5.3 2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
+        </svg>
+      )
+    case 'pragmatist':
+      // Balanced scale & execution caliper
+      return (
+        <svg {...p}>
+          <path d="M4 6.5h16M12 6.5V20M8 20h8" stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M7 6.5l-3 6h6L7 6.5ZM17 6.5l-3 6h6l-3-6Z" stroke={color} strokeWidth="1.6" strokeLinejoin="round" />
+        </svg>
+      )
+    case 'skeptic':
+      // Inquiry lens with boundary probe
+      return (
+        <svg {...p}>
+          <circle cx="11" cy="11" r="6.75" stroke={color} strokeWidth="1.75" />
+          <path d="m20.5 20.5-4.6-4.6" stroke={color} strokeWidth="1.9" strokeLinecap="round" />
+          <path d="M11 8v3.5M11 14.5h.01" stroke={color} strokeWidth="2" strokeLinecap="round" />
+        </svg>
+      )
+    case 'synthesizer':
+      // Intersecting dialectical resonance rings
+      return (
+        <svg {...p}>
+          <circle cx="9" cy="12" r="5.75" stroke={color} strokeWidth="1.75" />
+          <circle cx="15" cy="12" r="5.75" stroke={color} strokeWidth="1.75" />
+          <path d="M12 8.2v7.6" stroke={color} strokeWidth="1.75" strokeLinecap="round" />
+        </svg>
+      )
+    case 'provocateur':
+    default:
+      // High-friction spark & disruptive bolt
+      return (
+        <svg {...p}>
+          <path d="M13 2.5 4 14h7l-1.5 7.5L20 9.5h-7l1.5-7Z" stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )
+  }
+}
+

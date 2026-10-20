@@ -9,6 +9,7 @@ import Results from './components/Results'
 import CompletedDebate from './components/CompletedDebate'
 import History from './components/History'
 import { getModelById } from './data/models'
+import { getArchetypeById, defaultArchetypeForModel } from './data/archetypes'
 import { generateBattle } from './services/battleService'
 import { loadHistory, saveBattleToHistory } from './services/historyStore'
 import { decodeDemoHash, clearDemoHash } from './services/shareLink'
@@ -40,9 +41,14 @@ export default function App() {
     if (!demo) return
     const a = getModelById(demo.modelIds[0])
     const b = getModelById(demo.modelIds[1])
+    const archA = demo.archetypeIds?.[0] ? getArchetypeById(demo.archetypeIds[0]) : defaultArchetypeForModel(a?.id)
+    const archB = demo.archetypeIds?.[1] ? getArchetypeById(demo.archetypeIds[1]) : defaultArchetypeForModel(b?.id)
     if (a || b) {
       setQuestion(demo.question)
-      setSelected([a, a && b ? (b.id === a.id ? null : b) : b])
+      setSelected([
+        a ? { ...a, archetype: archA } : null,
+        a && b ? (b.id === a.id ? null : { ...b, archetype: archB }) : (b ? { ...b, archetype: archB } : null)
+      ])
       setSharePrefilled(true)
       setView('config')
     }
@@ -113,7 +119,12 @@ export default function App() {
   const reopenHistoryEntry = useCallback((entry) => {
     const models = entry.fighters.map((f) => {
       const m = getModelById(f.modelId)
-      return m || { id: f.modelId, name: f.name, provider: f.provider, modelLabel: f.modelLabel, accent: null, apiModel: null }
+      const base = m || { id: f.modelId, name: f.name, provider: f.provider, modelLabel: f.modelLabel, accent: null, apiModel: null }
+      const arch = f.archetypeId ? getArchetypeById(f.archetypeId) : defaultArchetypeForModel(f.modelId)
+      return {
+        ...base,
+        archetype: arch
+      }
     })
     setSelected(models)
     setQuestion(entry.question)

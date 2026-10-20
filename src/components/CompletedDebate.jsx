@@ -55,7 +55,7 @@ export default function CompletedDebate({ battle, selected, onBackToResults, onN
               <div className="fighter-chip-text">
                 <span className="fighter-chip-slot">FIGHTER 0{slot + 1}</span>
                 <strong>{m.name}</strong>
-                <small>{m.provider} · {m.modelLabel}</small>
+                <small>{m.archetype ? `${m.archetype.name}` : `${m.provider} · ${m.modelLabel}`}</small>
               </div>
             </div>
           )
