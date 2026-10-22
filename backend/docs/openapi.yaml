@@ -1,0 +1,1664 @@
+openapi: 3.1.0
+info:
+  title: Sangram AI Backend API
+  version: 1.0.0
+  description: |
+    # SANGRAM AI API Specification
+    
+    Complete OpenAPI 3.1 contract for Sangram AI — Dialectic Multi-Model Arena Platform.
+    
+    This document defines both implemented foundation endpoints and planned domain operations.
+    Planned operations are explicitly marked with:
+    - `x-implementation-status: planned`
+    - `x-owner: developer-<N>`
+    
+    ### Developer Ownership Matrix:
+    - **Developer 1 (Architecture)**: Foundation, Health Probes, Error standards, CORS, Request-ID, OpenAPI.
+    - **Developer 2 (Auth & DB)**: Authentication, Registration, Session, Email verification, Password reset, User Profiles.
+    - **Developer 3 (AI Gateway)**: Model Gateway, Provider health, Token cost estimation.
+    - **Developer 4 (Battles & SSE)**: Arena debates, SSE stream, Rebuttals, Convergence scoring, Saved ADRs, Public shares.
+    - **Developer 5 (Billing & Usage)**: Subscriptions, Stripe checkout, Quota reservations, Invoices, Webhooks.
+    - **Developer 6 (Security & Ops)**: Rate limiting, Security headers, CI/CD, Production readiness.
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+  - url: https://api.sangram.ai
+    description: Production gateway (Reverse proxy with TLS termination)
+
+paths:
+  # ============================================================================
+  # 1. FOUNDATION & HEALTH PROBES (Developer 1 - Implemented)
+  # ============================================================================
+  /health/live:
+    get:
+      summary: Application Liveness Probe
+      description: Returns 200 OK if the application process is running. Independent of database health.
+      tags:
+        - Health Probes
+      responses:
+        '200':
+          description: Process is live.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthLiveResponse'
+
+  /health/ready:
+    get:
+      summary: Database & Backend Readiness Probe
+      description: Bounded SELECT 1 check against PostgreSQL. Returns 503 if database is unreachable.
+      tags:
+        - Health Probes
+      responses:
+        '200':
+          description: Backend and database are ready to serve traffic.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthReadyResponse'
+        '503':
+          description: Database connectivity unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ============================================================================
+  # 2. AI MODEL & ARCHETYPE CATALOG (Developer 1 / 3 - Implemented)
+  # ============================================================================
+  /api/models:
+    get:
+      summary: Get AI Combatant Models
+      description: Returns the full catalog of combatant AI models (ChatGPT, Gemini, Claude, Llama, Mistral, Grok).
+      tags:
+        - AI Model Catalog
+      responses:
+        '200':
+          description: List of fighter profiles.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ModelProfile'
+
+  /api/models/{model_id}:
+    get:
+      summary: Get Model Details
+      tags:
+        - AI Model Catalog
+      parameters:
+        - name: model_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Fighter profile details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelProfile'
+        '404':
+          description: Model not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/archetypes:
+    get:
+      summary: Get Cognitive Archetypes
+      description: Returns the 6 cognitive persona archetypes that modulate debate reasoning.
+      tags:
+        - AI Model Catalog
+      responses:
+        '200':
+          description: List of archetypes.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ArchetypeProfile'
+
+  # ============================================================================
+  # 3. AUTHENTICATION & IDENTITY (Developer 2 - Planned)
+  # ============================================================================
+  /api/auth/register:
+    post:
+      summary: Register New User Account
+      tags:
+        - Authentication
+      x-implementation-status: planned
+      x-owner: developer-2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Account created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '409':
+          description: Email already registered.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/login:
+    post:
+      summary: Authenticate User
+      tags:
+        - Authentication
+      x-implementation-status: planned
+      x-owner: developer-2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authentication successful.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                description: HttpOnly session cookie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: Invalid email or password.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/logout:
+    post:
+      summary: Terminate Session
+      tags:
+        - Authentication
+      security:
+        - BearerAuth: []
+        - CookieAuth: []
+      x-implementation-status: planned
+      x-owner: developer-2
+      responses:
+        '200':
+          description: Session terminated.
+
+  /api/auth/me:
+    get:
+      summary: Get Current Authenticated Principal
+      tags:
+        - Authentication
+      security:
+        - BearerAuth: []
+        - CookieAuth: []
+      x-implementation-status: planned
+      x-owner: developer-2
+      responses:
+        '200':
+          description: Principal identity and roles.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentPrincipal'
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/verify-email:
+    post:
+      summary: Verify Email Confirmation Code
+      tags:
+        - Authentication
+      security:
+        - BearerAuth: []
+      x-implementation-status: planned
+      x-owner: developer-2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyEmailRequest'
+      responses:
+        '200':
+          description: Email verified.
+
+  /api/auth/forgot-password:
+    post:
+      summary: Request Password Reset Link
+      tags:
+        - Authentication
+      x-implementation-status: planned
+      x-owner: developer-2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '200':
+          description: Instructions dispatched if email exists.
+
+  /api/auth/reset-password:
+    post:
+      summary: Confirm Password Reset
+      tags:
+        - Authentication
+      x-implementation-status: planned
+      x-owner: developer-2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Password reset successful.
+
+  # ============================================================================
+  # 4. USER PROFILE & PREFERENCES (Developer 2 - Planned)
+  # ============================================================================
+  /api/users/me/profile:
+    get:
+      summary: Get User Profile
+      tags:
+        - User Account
+      security:
+        - BearerAuth: []
+      x-implementation-status: planned
+      x-owner: developer-2
+      responses:
+        '200':
+          description: User profile.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+    put:
+      summary: Update User Profile
+      tags:
+        - User Account
+      security:
+        - BearerAuth: []
+      x-implementation-status: planned
+      x-owner: developer-2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                avatar:
+                  type: string
+      responses:
+        '200':
+          description: Profile updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+
+  /api/users/me/preferences:
+    get:
+      summary: Get User Preferences
+      tags:
+        - User Account
+      security:
+        - BearerAuth: []
+      x-implementation-status: planned
+      x-owner: developer-2
+      responses:
+        '200':
+          description: Theme and motion preferences.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreferences'
+    put:
+      summary: Update User Preferences
+      tags:
+        - User Account
+      security:
+        - BearerAuth: []
+      x-implementation-status: planned
+      x-owner: developer-2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPreferences'
+      responses:
+        '200':
+          description: Preferences updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreferences'
+
+  /api/users/me:
+    delete:
+      summary: Delete User Account
+      tags:
+        - User Account
+      security:
+        - BearerAuth: []
+      x-implementation-status: planned
+      x-owner: developer-2
+      responses:
+        '200':
+          description: Account deleted.
+
+  # ============================================================================
+  # 5. DIALECTIC BATTLES & SSE STREAMING (Developer 4 - Planned)
+  # ============================================================================
+  /api/battles:
+    post:
+      summary: Initiate Arena Battle
+      description: Validates fighter models, checks credit quota, starts debate orchestration.
+      tags:
+        - Dialectic Battles
+      security:
+        - BearerAuth: []
+        - CookieAuth: []
+      x-implementation-status: planned
+      x-owner: developer-4
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BattleCreateRequest'
+      responses:
+        '201':
+          description: Battle accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BattleCreateResponse'
+        '400':
+          description: Invalid request parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Credit quota exceeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: List User Battle History
+      tags:
+        - Dialectic Battles
+      security:
+        - BearerAuth: []
+      x-implementation-status: planned
+      x-owner: developer-4
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Paginated battle history cards.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBattleSummaryResponse'
+
+  /api/battles/{id}:
+    get:
+      summary: Get Full Battle Record
+      description: Returns the full normalized Battle object matching frontend expectations.
+      tags:
+        - Dialectic Battles
+      security:
+        - BearerAuth: []
+        - CookieAuth: []
+      x-implementation-status: planned
+      x-owner: developer-4
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Full normalized Battle object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Battle'
+        '404':
+          description: Battle not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Delete Battle Record
+      tags:
+        - Dialectic Battles
+      security:
+        - BearerAuth: []
+      x-implementation-status: planned
+      x-owner: developer-4
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Battle removed.
+
+  /api/battles/{id}/events:
+    get:
+      summary: Stream Battle Events via SSE
+      description: |
+        Server-Sent Events endpoint streaming real-time stage transitions, message chunks,
+        round summaries, and final synthesis verdict.
+        
+        **Browser-Compatible Authentication for SSE**:
+        Native browser `EventSource` cannot send custom `Authorization: Bearer <token>` headers.
+        Sangram AI supports two secure patterns:
+        1. **Session Cookie**: HttpOnly `sangram_session` cookie automatically sent with `withCredentials: true`.
+        2. **Authenticated Fetch Stream**: Client uses standard `fetch()` with `Authorization: Bearer <token>`
+           and reads the `response.body` stream via `ReadableStreamDefaultReader`.
+        
+        *Durable bearer tokens in query parameters are strictly forbidden for security.*
+      tags:
+        - Dialectic Battles
+      security:
+        - CookieAuth: []
+        - BearerAuth: []
+      x-implementation-status: planned
+      x-owner: developer-4
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: Last-Event-ID
+          in: header
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Real-time event stream.
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: Continuous Server-Sent Event stream.
+
+  /api/battles/{id}/cancel:
+    post:
+      summary: Cancel In-Progress Battle
+      tags:
+        - Dialectic Battles
+      security:
+        - BearerAuth: []
+      x-implementation-status: planned
+      x-owner: developer-4
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Battle execution cancelled.
+
+  /api/battles/{id}/retry:
+    post:
+      summary: Retry Failed Battle
+      tags:
+        - Dialectic Battles
+      security:
+        - BearerAuth: []
+      x-implementation-status: planned
+      x-owner: developer-4
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Battle re-queued.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BattleCreateResponse'
+
+  # ============================================================================
+  # 6. SHARE LINKS (Developer 4 - Planned)
+  # ============================================================================
+  /api/shares:
+    post:
+      summary: Create Debate Share Link
+      tags:
+        - Debate Shares
+      security:
+        - BearerAuth: []
+      x-implementation-status: planned
+      x-owner: developer-4
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShareCreateRequest'
+      responses:
+        '201':
+          description: Stable share token generated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShareCreateResponse'
+
+  /api/s/{token}:
+    get:
+      summary: Get Shared Debate Snapshot
+      description: Public read-only endpoint returning the sanitized debate snapshot.
+      tags:
+        - Debate Shares
+      x-implementation-status: planned
+      x-owner: developer-4
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Read-only Battle object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Battle'
+        '404':
+          description: Share link expired or not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ============================================================================
+  # 7. SAVED ANSWERS & ADR RECORDS (Developer 4 - Planned)
+  # ============================================================================
+  /api/saved:
+    get:
+      summary: List Saved Answers
+      tags:
+        - Saved Answers
+      security:
+        - BearerAuth: []
+      x-implementation-status: planned
+      x-owner: developer-4
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Paginated saved answers.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSavedAnswerResponse'
+    post:
+      summary: Save Debate Synthesis
+      tags:
+        - Saved Answers
+      security:
+        - BearerAuth: []
+      x-implementation-status: planned
+      x-owner: developer-4
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SavedAnswerCreate'
+      responses:
+        '201':
+          description: Saved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedAnswerResponse'
+
+  /api/saved/{id}:
+    delete:
+      summary: Remove Saved Answer
+      tags:
+        - Saved Answers
+      security:
+        - BearerAuth: []
+      x-implementation-status: planned
+      x-owner: developer-4
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Removed from library.
+
+  # ============================================================================
+  # 8. BILLING, SUBSCRIPTIONS & USAGE (Developer 5 - Planned)
+  # ============================================================================
+  /api/billing/plans:
+    get:
+      summary: Get Subscription Plans
+      tags:
+        - Billing & Subscriptions
+      responses:
+        '200':
+          description: List of pricing tiers with prices in integer minor units (cents).
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlanResponse'
+
+  /api/billing/subscription:
+    get:
+      summary: Get Customer Subscription
+      tags:
+        - Billing & Subscriptions
+      security:
+        - BearerAuth: []
+      x-implementation-status: planned
+      x-owner: developer-5
+      responses:
+        '200':
+          description: Customer subscription details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionResponse'
+
+  /api/billing/checkout:
+    post:
+      summary: Create Checkout Session
+      tags:
+        - Billing & Subscriptions
+      security:
+        - BearerAuth: []
+      x-implementation-status: planned
+      x-owner: developer-5
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckoutSessionRequest'
+      responses:
+        '200':
+          description: Hosted checkout redirect URL.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutSessionResponse'
+
+  /api/billing/subscription/cancel:
+    post:
+      summary: Cancel Subscription
+      tags:
+        - Billing & Subscriptions
+      security:
+        - BearerAuth: []
+      x-implementation-status: planned
+      x-owner: developer-5
+      responses:
+        '200':
+          description: Scheduled for cancellation at period end.
+
+  /api/billing/invoices:
+    get:
+      summary: List Billing Invoices
+      tags:
+        - Billing & Subscriptions
+      security:
+        - BearerAuth: []
+      x-implementation-status: planned
+      x-owner: developer-5
+      responses:
+        '200':
+          description: Historical billing statements.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InvoiceResponse'
+
+  /api/usage:
+    get:
+      summary: Get Monthly Usage and Quotas
+      tags:
+        - Billing & Subscriptions
+      security:
+        - BearerAuth: []
+      x-implementation-status: planned
+      x-owner: developer-5
+      responses:
+        '200':
+          description: Credit quota and model breakdown.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageResponse'
+
+  /api/webhooks/payment:
+    post:
+      summary: Payment Processor Webhook Ingress
+      tags:
+        - Billing & Subscriptions
+      x-implementation-status: planned
+      x-owner: developer-5
+      parameters:
+        - name: Stripe-Signature
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Webhook acknowledged.
+
+# ==============================================================================
+# COMPONENTS & SCHEMAS
+# ==============================================================================
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Provide access token in Authorization header as 'Bearer <token>'
+    CookieAuth:
+      type: apiKey
+      in: cookie
+      name: sangram_session
+      description: HttpOnly session cookie
+
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+        - retryable
+        - requestId
+      properties:
+        code:
+          type: string
+          enum:
+            - MISSING_CONFIG
+            - API_FAILURE
+            - TIMEOUT
+            - RATE_LIMIT
+            - AUTH_FAILED
+            - NETWORK_OFFLINE
+            - EMPTY_RESPONSE
+            - SYNTHESIS_FAILED
+            - VALIDATION_ERROR
+            - NOT_FOUND
+            - FORBIDDEN
+            - CONFLICT
+            - MODULE_NOT_IMPLEMENTED
+            - INTERNAL_SERVER_ERROR
+            - SERVICE_UNAVAILABLE
+        message:
+          type: string
+        retryable:
+          type: boolean
+        requestId:
+          type: string
+        details:
+          nullable: true
+
+    HealthLiveResponse:
+      type: object
+      required:
+        - status
+        - version
+        - timestamp
+      properties:
+        status:
+          type: string
+          example: ok
+        version:
+          type: string
+          example: 1.0.0
+        timestamp:
+          type: string
+          format: date-time
+
+    HealthReadyResponse:
+      type: object
+      required:
+        - status
+        - database
+        - timestamp
+      properties:
+        status:
+          type: string
+          example: ok
+        database:
+          type: string
+          example: connected
+        timestamp:
+          type: string
+          format: date-time
+        response_time_ms:
+          type: number
+          example: 1.85
+        details:
+          type: string
+          nullable: true
+
+    ModelAccent:
+      type: object
+      required:
+        - color
+        - soft
+        - line
+      properties:
+        color:
+          type: string
+        soft:
+          type: string
+        line:
+          type: string
+
+    ModelProfile:
+      type: object
+      required:
+        - id
+        - name
+        - provider
+        - modelLabel
+        - desc
+        - accent
+        - is_available
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        provider:
+          type: string
+        modelLabel:
+          type: string
+        apiModel:
+          type: string
+          nullable: true
+        desc:
+          type: string
+        accent:
+          $ref: '#/components/schemas/ModelAccent'
+        is_available:
+          type: boolean
+
+    ArchetypeProfile:
+      type: object
+      required:
+        - id
+        - name
+        - shortName
+        - tag
+        - motto
+        - description
+        - traits
+        - debateStyle
+        - accent
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        shortName:
+          type: string
+        tag:
+          type: string
+        motto:
+          type: string
+        description:
+          type: string
+        traits:
+          type: array
+          items:
+            type: string
+        debateStyle:
+          type: string
+        accent:
+          $ref: '#/components/schemas/ModelAccent'
+
+    CurrentPrincipal:
+      type: object
+      required:
+        - user_id
+        - email
+        - role
+        - tier
+        - is_authenticated
+      properties:
+        user_id:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+        tier:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+        is_authenticated:
+          type: boolean
+
+    RegisterRequest:
+      type: object
+      required:
+        - name
+        - email
+        - password
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    TokenResponse:
+      type: object
+      required:
+        - access_token
+        - token_type
+        - expires_in
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+          example: bearer
+        expires_in:
+          type: integer
+        refresh_token:
+          type: string
+          nullable: true
+
+    UserPreferences:
+      type: object
+      properties:
+        theme:
+          type: string
+          enum: [obsidian, navy]
+          default: obsidian
+        motion:
+          type: string
+          enum: [full, reduced]
+          default: full
+
+    UserProfileResponse:
+      type: object
+      required:
+        - id
+        - name
+        - email
+        - role
+        - tier
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+        tier:
+          type: string
+        avatar:
+          type: string
+          nullable: true
+        preferences:
+          $ref: '#/components/schemas/UserPreferences'
+
+    VerifyEmailRequest:
+      type: object
+      required:
+        - code
+      properties:
+        code:
+          type: string
+
+    ForgotPasswordRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+
+    ResetPasswordRequest:
+      type: object
+      required:
+        - token
+        - newPassword
+      properties:
+        token:
+          type: string
+        newPassword:
+          type: string
+          format: password
+
+    BattleCreateRequest:
+      type: object
+      required:
+        - question
+        - modelA
+        - modelB
+      properties:
+        question:
+          type: string
+          minLength: 10
+          maxLength: 1000
+          example: "Should startups choose Python or Go for high-throughput services?"
+        modelA:
+          type: string
+          example: chatgpt
+        modelB:
+          type: string
+          example: claude
+        archetypeA:
+          type: string
+          nullable: true
+        archetypeB:
+          type: string
+          nullable: true
+        context:
+          type: string
+          nullable: true
+        clientBattleId:
+          type: string
+          nullable: true
+
+    BattleCreateResponse:
+      type: object
+      required:
+        - battleId
+        - streamUrl
+      properties:
+        battleId:
+          type: string
+        streamUrl:
+          type: string
+        estimatedCost:
+          type: integer
+          nullable: true
+          description: Estimated cost in integer cents
+
+    BattleFighter:
+      type: object
+      required:
+        - slot
+        - modelId
+        - name
+        - provider
+        - modelLabel
+      properties:
+        slot:
+          type: integer
+          enum: [0, 1]
+        modelId:
+          type: string
+        name:
+          type: string
+        provider:
+          type: string
+        modelLabel:
+          type: string
+        archetypeId:
+          type: string
+          nullable: true
+        archetypeName:
+          type: string
+          nullable: true
+        archetypeTag:
+          type: string
+          nullable: true
+
+    BattleMessage:
+      type: object
+      required:
+        - id
+        - round
+        - stageKey
+        - stageLabel
+        - speaker
+        - modelId
+        - modelName
+        - provider
+        - modelLabel
+        - text
+        - converging
+      properties:
+        id:
+          type: string
+        round:
+          type: integer
+          enum: [1, 2, 3, 4]
+        stageKey:
+          type: string
+          enum: [opening, counter, rebuttal, final]
+        stageLabel:
+          type: string
+        speaker:
+          type: string
+          enum: [A, B]
+        modelId:
+          type: string
+        modelName:
+          type: string
+        provider:
+          type: string
+        modelLabel:
+          type: string
+        text:
+          type: string
+        challenges:
+          type: string
+          nullable: true
+        contention:
+          type: string
+          nullable: true
+        converging:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    BattleInsights:
+      type: object
+      required:
+        - a
+        - b
+      properties:
+        a:
+          type: string
+        b:
+          type: string
+
+    BattleAgreement:
+      type: object
+      properties:
+        score:
+          type: integer
+          nullable: true
+          minimum: 0
+          maximum: 100
+        note:
+          type: string
+          nullable: true
+        label:
+          type: string
+          nullable: true
+        demo:
+          type: boolean
+          default: false
+        computedAt:
+          type: string
+          format: date-time
+          nullable: true
+        method:
+          type: string
+          nullable: true
+
+    Battle:
+      type: object
+      required:
+        - id
+        - question
+        - fighters
+        - messages
+        - roundSummaries
+        - finalAnswer
+        - insights
+        - source
+      properties:
+        id:
+          type: string
+        question:
+          type: string
+        fighters:
+          type: array
+          minItems: 2
+          maxItems: 2
+          items:
+            $ref: '#/components/schemas/BattleFighter'
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/BattleMessage'
+        roundSummaries:
+          type: array
+          items:
+            type: string
+        finalAnswer:
+          type: string
+        insights:
+          $ref: '#/components/schemas/BattleInsights'
+        agreement:
+          $ref: '#/components/schemas/BattleAgreement'
+          nullable: true
+        source:
+          type: string
+          enum: [backend, local-mock]
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    BattleSummaryCard:
+      type: object
+      required:
+        - id
+        - title
+        - topic
+        - date
+        - models
+        - status
+        - roundsCount
+        - summary
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        topic:
+          type: string
+        date:
+          type: string
+        models:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+        roundsCount:
+          type: integer
+        summary:
+          type: string
+        consensusScore:
+          type: integer
+          nullable: true
+
+    PaginatedBattleSummaryResponse:
+      type: object
+      required:
+        - items
+        - total
+        - page
+        - page_size
+        - has_more
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BattleSummaryCard'
+        total:
+          type: integer
+        page:
+          type: integer
+        page_size:
+          type: integer
+        has_more:
+          type: boolean
+
+    ShareCreateRequest:
+      type: object
+      required:
+        - battleId
+      properties:
+        battleId:
+          type: string
+
+    ShareCreateResponse:
+      type: object
+      required:
+        - shareToken
+        - url
+      properties:
+        shareToken:
+          type: string
+        url:
+          type: string
+
+    SavedAnswerCreate:
+      type: object
+      required:
+        - battleId
+        - question
+        - finalAnswer
+        - fighters
+      properties:
+        battleId:
+          type: string
+        question:
+          type: string
+        finalAnswer:
+          type: string
+        fighters:
+          type: array
+          items:
+            type: string
+        notes:
+          type: string
+          nullable: true
+
+    SavedAnswerResponse:
+      type: object
+      required:
+        - id
+        - userId
+        - battleId
+        - question
+        - finalAnswer
+        - fighters
+        - dateSaved
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        battleId:
+          type: string
+        question:
+          type: string
+        finalAnswer:
+          type: string
+        fighters:
+          type: array
+          items:
+            type: string
+        dateSaved:
+          type: string
+          format: date-time
+        notes:
+          type: string
+          nullable: true
+
+    PaginatedSavedAnswerResponse:
+      type: object
+      required:
+        - items
+        - total
+        - page
+        - page_size
+        - has_more
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SavedAnswerResponse'
+        total:
+          type: integer
+        page:
+          type: integer
+        page_size:
+          type: integer
+        has_more:
+          type: boolean
+
+    PlanPricing:
+      type: object
+      required:
+        - monthlyCents
+        - yearlyCents
+        - currency
+      properties:
+        monthlyCents:
+          type: integer
+          example: 2900
+        yearlyCents:
+          type: integer
+          example: 29000
+        currency:
+          type: string
+          example: USD
+
+    PlanResponse:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - pricing
+        - features
+        - monthlyBattleQuota
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        badge:
+          type: string
+          nullable: true
+        description:
+          type: string
+        pricing:
+          $ref: '#/components/schemas/PlanPricing'
+        features:
+          type: array
+          items:
+            type: string
+        monthlyBattleQuota:
+          type: integer
+
+    SubscriptionResponse:
+      type: object
+      required:
+        - id
+        - userId
+        - planId
+        - status
+        - interval
+        - currentPeriodStart
+        - currentPeriodEnd
+        - cancelAtPeriodEnd
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        planId:
+          type: string
+        status:
+          type: string
+          enum: [active, trialing, past_due, canceled, incomplete]
+        interval:
+          type: string
+          enum: [monthly, yearly]
+        currentPeriodStart:
+          type: string
+          format: date-time
+        currentPeriodEnd:
+          type: string
+          format: date-time
+        cancelAtPeriodEnd:
+          type: boolean
+
+    CheckoutSessionRequest:
+      type: object
+      required:
+        - planId
+        - interval
+        - successUrl
+        - cancelUrl
+      properties:
+        planId:
+          type: string
+        interval:
+          type: string
+          enum: [monthly, yearly]
+        successUrl:
+          type: string
+        cancelUrl:
+          type: string
+
+    CheckoutSessionResponse:
+      type: object
+      required:
+        - sessionId
+        - checkoutUrl
+      properties:
+        sessionId:
+          type: string
+        checkoutUrl:
+          type: string
+
+    InvoiceResponse:
+      type: object
+      required:
+        - id
+        - number
+        - amountCents
+        - currency
+        - status
+        - date
+      properties:
+        id:
+          type: string
+        number:
+          type: string
+        amountCents:
+          type: integer
+        currency:
+          type: string
+        status:
+          type: string
+          enum: [paid, open, void, uncollectible]
+        date:
+          type: string
+          format: date-time
+        pdfUrl:
+          type: string
+          nullable: true
+
+    UsageResponse:
+      type: object
+      required:
+        - userId
+        - billingPeriod
+        - quotaTotal
+        - quotaUsed
+        - quotaRemaining
+      properties:
+        userId:
+          type: string
+        billingPeriod:
+          type: string
+          example: "2026-10"
+        quotaTotal:
+          type: integer
+        quotaUsed:
+          type: integer
+        quotaRemaining:
+          type: integer
+        modelBreakdown:
+          type: object
+          additionalProperties:
+            type: integer
+        lastUpdated:
+          type: string
+          format: date-time
