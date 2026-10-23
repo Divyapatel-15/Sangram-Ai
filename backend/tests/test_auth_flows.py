@@ -223,3 +223,60 @@ async def test_delete_account_requires_password_and_cascades(client, client_b, d
     # the deleted account can no longer log in
     gone = await client.post("/api/auth/login", json={"email": "a@example.com", "password": PW})
     assert gone.status_code == 401
+
+
+# ------------------------- email change & occupation -------------------------
+
+async def test_occupation_editable_via_profile(client):
+    await register(client)
+    r = await client.put("/api/users/me/profile", json={"occupation": "Designer"})
+    assert r.status_code == 200 and r.json()["occupation"] == "Designer"
+
+
+async def test_email_change_requires_password_and_confirmation(client, client_b, outbox):
+    await register(client)
+    await client_b.post("/api/auth/login", json={"email": "ada@example.com", "password": PW})
+    bad = await client.post("/api/auth/change-email", json={"newEmail": "new@example.com", "password": "wrong-pass-1"})
+    assert bad.status_code == 422 and outbox.messages[-1]["to"] == "ada@example.com"
+
+    ok = await client.post("/api/auth/change-email", json={"newEmail": "New@Example.com", "password": PW})
+    assert ok.status_code == 200
+    assert outbox.messages[-1]["to"] == "new@example.com"  # code goes to the NEW address
+    # Email is unchanged until confirmed.
+    assert (await client.get("/api/auth/me")).json()["email"] == "ada@example.com"
+
+    wrong = await client.post("/api/auth/confirm-email-change", json={"code": "000000"})
+    assert wrong.status_code == 422
+    done = await client.post("/api/auth/confirm-email-change", json={"code": outbox.last_code()})
+    assert done.status_code == 200 and done.json()["email"] == "new@example.com"
+
+    me = (await client.get("/api/auth/me")).json()
+    assert me["email"] == "new@example.com" and me["is_verified"] is True
+    assert outbox.messages[-1]["to"] == "ada@example.com"  # old address is notified
+    assert (await client_b.get("/api/auth/me")).status_code == 401  # other devices signed out
+    # login works with the new email only
+    client.cookies.clear()
+    assert (await client.post("/api/auth/login", json={"email": "new@example.com", "password": PW})).status_code == 200
+    assert (await client.post("/api/auth/login", json={"email": "ada@example.com", "password": PW})).status_code == 401
+
+
+async def test_email_change_rejects_taken_and_same_email(client, client_b):
+    await register(client, email="a@example.com")
+    await register(client_b, email="b@example.com", name="Bob B")
+    taken = await client.post("/api/auth/change-email", json={"newEmail": "B@example.com", "password": PW})
+    assert taken.status_code == 409
+    same = await client.post("/api/auth/change-email", json={"newEmail": "a@example.com", "password": PW})
+    assert same.status_code == 422
+
+
+async def test_email_change_code_attempt_limit_and_isolation(client, client_b, outbox):
+    await register(client, email="a@example.com")
+    await register(client_b, email="b@example.com", name="Bob B")
+    await client.post("/api/auth/change-email", json={"newEmail": "a2@example.com", "password": PW})
+    code = outbox.last_code()
+    # Bob has no pending change, so Alice's code is useless to him.
+    assert (await client_b.post("/api/auth/confirm-email-change", json={"code": code})).status_code == 422
+    for _ in range(5):
+        assert (await client.post("/api/auth/confirm-email-change", json={"code": "000000"})).status_code == 422
+    assert (await client.post("/api/auth/confirm-email-change", json={"code": code})).status_code == 422
+    assert (await client.get("/api/auth/me")).json()["email"] == "a@example.com"

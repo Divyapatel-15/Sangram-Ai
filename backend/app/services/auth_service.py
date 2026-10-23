@@ -26,7 +26,7 @@ from app.core.errors import (
     RateLimitError,
     ValidationError,
 )
-from app.db.auth_models import EmailVerification, PasswordReset, UserSession
+from app.db.auth_models import EmailChange, EmailVerification, PasswordReset, UserSession
 from app.proposals.entities import Profile, User
 from app.schemas.auth import (
     CurrentPrincipal,
@@ -283,6 +283,91 @@ class AuthService:
         await self._revoke_sessions(user_id, except_session_id=keep_session_id)
         await self.db.commit()
         return True
+
+    async def request_email_change(self, user_id: str, new_email: str, password: str) -> bool:
+        user = (await self.db.execute(select(User).where(User.id == user_id))).scalar_one_or_none()
+        if user is None:
+            raise NotFoundError("User not found.")
+        if not security.verify_password(password, user.password_hash):
+            raise ValidationError("Password is incorrect.", details=[{"loc": ["password"]}])
+        new_email = normalize_email(new_email)
+        if new_email == user.email:
+            raise ValidationError("This is already your email address.")
+        if (await self.db.execute(select(User.id).where(User.email == new_email))).first():
+            raise ConflictError("An account with this email already exists.")
+        latest = (
+            await self.db.execute(
+                select(EmailChange.created_at)
+                .where(EmailChange.user_id == user_id)
+                .order_by(EmailChange.created_at.desc())
+                .limit(1)
+            )
+        ).scalar_one_or_none()
+        cooldown = timedelta(seconds=self.settings.EMAIL_RESEND_COOLDOWN_SECONDS)
+        if latest is not None and utcnow() - aware(latest) < cooldown:
+            raise RateLimitError("Please wait a minute before requesting another code.")
+        await self.db.execute(
+            update(EmailChange)
+            .where(EmailChange.user_id == user_id, EmailChange.used_at.is_(None))
+            .values(used_at=utcnow())
+        )
+        code = security.new_numeric_code(6)
+        self.db.add(
+            EmailChange(
+                user_id=user_id,
+                new_email=new_email,
+                code_hash=security.digest(f"{user_id}:{new_email}:{code}", "email-change"),
+                expires_at=utcnow() + timedelta(minutes=self.settings.EMAIL_VERIFICATION_EXPIRE_MINUTES),
+            )
+        )
+        await self.db.commit()
+        await self.email.send(
+            new_email,
+            "Confirm your new Sangram AI email",
+            f"Your confirmation code is {code}. It expires in "
+            f"{self.settings.EMAIL_VERIFICATION_EXPIRE_MINUTES} minutes.\n"
+            "If you did not request this, ignore this email.",
+        )
+        return True
+
+    async def confirm_email_change(self, user_id: str, code: str, keep_session_id: Optional[str] = None) -> str:
+        record = (
+            await self.db.execute(
+                select(EmailChange)
+                .where(EmailChange.user_id == user_id, EmailChange.used_at.is_(None))
+                .order_by(EmailChange.created_at.desc())
+                .limit(1)
+            )
+        ).scalar_one_or_none()
+        if record is None or aware(record.expires_at) <= utcnow():
+            raise ValidationError("This code has expired. Start the email change again.")
+        if record.attempts >= self.settings.EMAIL_VERIFICATION_MAX_ATTEMPTS:
+            raise ValidationError("Too many incorrect attempts. Start the email change again.")
+        expected = security.digest(f"{user_id}:{record.new_email}:{code.strip()}", "email-change")
+        if not hmac.compare_digest(expected, record.code_hash):
+            record.attempts += 1
+            await self.db.commit()  # persist the attempt before raising
+            raise ValidationError("Incorrect confirmation code.")
+        user = (await self.db.execute(select(User).where(User.id == user_id))).scalar_one()
+        if (await self.db.execute(select(User.id).where(User.email == record.new_email))).first():
+            raise ConflictError("An account with this email already exists.")
+        old_email = user.email
+        user.email = record.new_email
+        user.is_verified = True  # the code proved ownership of the new address
+        record.used_at = utcnow()
+        await self._revoke_sessions(user_id, except_session_id=keep_session_id)
+        try:
+            await self.db.commit()
+        except IntegrityError:
+            await self.db.rollback()
+            raise ConflictError("An account with this email already exists.")
+        await self.email.send(
+            old_email,
+            "Your Sangram AI email was changed",
+            f"The email on your account was changed to {user.email}. "
+            "If this wasn't you, reset your password immediately.",
+        )
+        return user.email
 
     async def list_sessions(self, user_id: str, current_session_id: Optional[str] = None) -> List[SessionInfo]:
         rows = (

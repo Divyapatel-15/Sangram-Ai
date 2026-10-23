@@ -70,3 +70,20 @@ class PasswordReset(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, nullable=False)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     used_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class EmailChange(Base):
+    """Pending change of the account email; the code is sent to the NEW address."""
+
+    __tablename__ = "email_changes"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    user_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    new_email: Mapped[str] = mapped_column(String(255), nullable=False)
+    code_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    used_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)

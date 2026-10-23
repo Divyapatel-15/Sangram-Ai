@@ -40,7 +40,11 @@ class UserService:
         return await self._response(user, profile)
 
     async def update_profile(
-        self, user_id: str, name: Optional[str] = None, avatar: Optional[str] = None
+        self,
+        user_id: str,
+        name: Optional[str] = None,
+        avatar: Optional[str] = None,
+        occupation: Optional[str] = None,
     ) -> UserProfileResponse:
         user, profile = await self._load(user_id)
         if name is not None:
@@ -55,6 +59,11 @@ class UserService:
                 profile.avatar_url = avatar
             else:
                 raise ValidationError("Avatar must be an http(s) URL.")
+        if occupation is not None:
+            occupation = occupation.strip()
+            if len(occupation) > 64:
+                raise ValidationError("Occupation must be 64 characters or fewer.")
+            profile.occupation = occupation or None
         await self.db.commit()
         return await self._response(user, profile)
 

@@ -26,6 +26,7 @@ router = APIRouter(prefix="/users/me", tags=["User Profile & Preferences"])
 class UpdateProfileRequest(BaseSchema):
     name: Optional[str] = Field(None, min_length=2, max_length=100)
     avatar: Optional[str] = Field(None, max_length=512)
+    occupation: Optional[str] = Field(None, max_length=64)
 
 
 @router.get(
@@ -57,7 +58,7 @@ async def update_profile(
 ) -> UserProfileResponse:
     """Updates display name or avatar. Owned by Developer 2."""
     return await user_service.update_profile(
-        user_id=principal.user_id, name=payload.name, avatar=payload.avatar
+        user_id=principal.user_id, name=payload.name, avatar=payload.avatar, occupation=payload.occupation
     )
 
 

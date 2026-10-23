@@ -124,3 +124,16 @@ class OnboardingRequest(BaseSchema):
     occupation: Optional[str] = Field(None, max_length=64)
     models: List[str] = Field(default_factory=list, max_length=6)
     archetype: Optional[str] = Field(None, max_length=64)
+
+
+class ChangeEmailRequest(BaseSchema):
+    """Start an email change; requires the current password."""
+
+    newEmail: EmailStr
+    password: str = Field(..., min_length=1, max_length=128)
+
+
+class ConfirmEmailChangeRequest(BaseSchema):
+    """Confirm with the code sent to the new address."""
+
+    code: str = Field(..., min_length=4, max_length=12)

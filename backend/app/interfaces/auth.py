@@ -73,6 +73,20 @@ class IAuthService(Protocol):
         """Changes the password and revokes every other session."""
         ...
 
+    async def request_email_change(self, user_id: str, new_email: str, password: str) -> bool:
+        """Sends a code to the NEW address; the email only changes after confirmation.
+
+        Raises:
+            ValidationError: Wrong password, or new email equals the current one.
+            ConflictError: The new email is already registered.
+        """
+        ...
+
+    async def confirm_email_change(self, user_id: str, code: str, keep_session_id: Optional[str] = None) -> str:
+        """Applies the pending change, marks the email verified, signs out other sessions.
+        Returns the new email."""
+        ...
+
     async def list_sessions(self, user_id: str, current_session_id: Optional[str] = None) -> List[SessionInfo]:
         """Lists the user's active sessions."""
         ...
@@ -107,9 +121,13 @@ class IUserService(Protocol):
         ...
 
     async def update_profile(
-        self, user_id: str, name: Optional[str] = None, avatar: Optional[str] = None
+        self,
+        user_id: str,
+        name: Optional[str] = None,
+        avatar: Optional[str] = None,
+        occupation: Optional[str] = None,
     ) -> UserProfileResponse:
-        """Updates user display name or avatar."""
+        """Updates display name, avatar or occupation (role)."""
         ...
 
     async def get_preferences(self, user_id: str) -> UserPreferences:

@@ -16,7 +16,9 @@ from app.core.config import get_settings
 from app.core.errors import AuthenticationError
 from app.interfaces.auth import IAuthService
 from app.schemas.auth import (
+    ChangeEmailRequest,
     ChangePasswordRequest,
+    ConfirmEmailChangeRequest,
     CurrentPrincipal,
     ForgotPasswordRequest,
     LoginRequest,
@@ -186,6 +188,31 @@ async def change_password(
         keep_session_id=principal.session_id,
     )
     return {"success": True, "message": "Password updated. Other sessions were signed out."}
+
+
+@router.post("/change-email", summary="Start Email Change (code sent to new address)")
+async def change_email(
+    payload: ChangeEmailRequest,
+    principal: CurrentPrincipal = Depends(get_current_principal),
+    auth_service: IAuthService = Depends(get_auth_service),
+) -> dict:
+    await auth_service.request_email_change(
+        user_id=principal.user_id, new_email=str(payload.newEmail), password=payload.password
+    )
+    return {"success": True, "message": "A confirmation code was sent to the new address."}
+
+
+@router.post("/confirm-email-change", summary="Confirm Email Change")
+async def confirm_email_change(
+    payload: ConfirmEmailChangeRequest,
+    principal: CurrentPrincipal = Depends(get_current_principal),
+    auth_service: IAuthService = Depends(get_auth_service),
+) -> dict:
+    """Applies the change, marks the email verified, and signs out other devices."""
+    new_email = await auth_service.confirm_email_change(
+        user_id=principal.user_id, code=payload.code, keep_session_id=principal.session_id
+    )
+    return {"success": True, "email": new_email}
 
 
 @router.get("/sessions", response_model=List[SessionInfo], summary="List Active Sessions")
