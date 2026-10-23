@@ -40,6 +40,30 @@ class Settings(BaseSettings):
         description="Minimum 32-character secret key for cryptographic signatures.",
     )
 
+    # Authentication & Sessions (Developer 2)
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 30
+    EMAIL_VERIFICATION_EXPIRE_MINUTES: int = 15
+    EMAIL_VERIFICATION_MAX_ATTEMPTS: int = 5
+    EMAIL_RESEND_COOLDOWN_SECONDS: int = 60
+    PASSWORD_RESET_EXPIRE_MINUTES: int = 30
+    ACCESS_COOKIE_NAME: str = "sangram_session"
+    REFRESH_COOKIE_NAME: str = "sangram_refresh"
+    COOKIE_SECURE: bool = False
+    COOKIE_SAMESITE: Literal["lax", "strict", "none"] = "lax"
+    COOKIE_DOMAIN: Union[str, None] = None
+    FRONTEND_URL: str = "http://localhost:3000"
+
+    # Email delivery (console = log to stdout in development only)
+    EMAIL_BACKEND: Literal["console", "smtp"] = "console"
+    EMAIL_FROM: str = "Sangram AI <no-reply@sangram.ai>"
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 587
+    SMTP_USERNAME: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_STARTTLS: bool = True
+
     # CORS Allowed Origins
     ALLOWED_ORIGINS: List[str] = Field(
         default=["http://localhost:3000", "http://127.0.0.1:3000"],
@@ -100,6 +124,14 @@ class Settings(BaseSettings):
                 raise ValueError(
                     "DATABASE_URL cannot use the default 'postgres:postgres@localhost' credentials in production."
                 )
+
+            # 5. Auth cookies must be Secure and email must not go to the console
+            if not self.COOKIE_SECURE:
+                raise ValueError("COOKIE_SECURE must be true in production.")
+            if self.COOKIE_SAMESITE == "none" and not self.COOKIE_SECURE:
+                raise ValueError("SameSite=None requires COOKIE_SECURE=true.")
+            if self.EMAIL_BACKEND == "console":
+                raise ValueError("EMAIL_BACKEND=console is not allowed in production; configure smtp.")
 
         return self
 

@@ -6,6 +6,7 @@ They are NOT finalized migrations — actual migrations are owned by Developer 2
 and Developer 5 (Billing).
 """
 
+import uuid
 from datetime import datetime, timezone
 from typing import List, Optional
 from sqlalchemy import (
@@ -17,7 +18,7 @@ from sqlalchemy import (
     String,
     Text,
 )
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
@@ -28,20 +29,20 @@ class User(Base, TimestampMixin):
 
     __tablename__ = "users"
 
-    id: Mapped[str] = mapped_column(String(36), primary_key=True)
-    email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)  # always stored lowercase
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(String(32), default="user", nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     # Relationships
-    profile: Mapped[Optional["Profile"]] = relationship(back_populates="user", uselist=False, cascade="all, delete-orphan")
-    battles: Mapped[List["Battle"]] = relationship(back_populates="user", cascade="all, delete-orphan")
-    saved_answers: Mapped[List["SavedAnswer"]] = relationship(back_populates="user", cascade="all, delete-orphan")
-    subscription: Mapped[Optional["Subscription"]] = relationship(back_populates="user", uselist=False)
-    invoices: Mapped[List["Invoice"]] = relationship(back_populates="user")
-    usage_ledger: Mapped[List["UsageLedger"]] = relationship(back_populates="user")
+    profile: Mapped[Optional["Profile"]] = relationship(back_populates="user", uselist=False, cascade="all, delete-orphan", passive_deletes=True)
+    battles: Mapped[List["Battle"]] = relationship(back_populates="user", cascade="all, delete-orphan", passive_deletes=True)
+    saved_answers: Mapped[List["SavedAnswer"]] = relationship(back_populates="user", cascade="all, delete-orphan", passive_deletes=True)
+    subscription: Mapped[Optional["Subscription"]] = relationship(back_populates="user", uselist=False, passive_deletes=True)
+    invoices: Mapped[List["Invoice"]] = relationship(back_populates="user", passive_deletes=True)
+    usage_ledger: Mapped[List["UsageLedger"]] = relationship(back_populates="user", passive_deletes=True)
 
 
 class Profile(Base, TimestampMixin):
@@ -49,12 +50,16 @@ class Profile(Base, TimestampMixin):
 
     __tablename__ = "profiles"
 
-    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     avatar_url: Mapped[Optional[str]] = mapped_column(String(512), nullable=True)
     theme: Mapped[str] = mapped_column(String(32), default="obsidian", nullable=False)
     motion: Mapped[str] = mapped_column(String(32), default="full", nullable=False)
+    occupation: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    onboarding_completed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    default_models: Mapped[list] = mapped_column(JSON, default=list, nullable=False)
+    default_archetype: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
 
     user: Mapped["User"] = relationship(back_populates="profile")
 

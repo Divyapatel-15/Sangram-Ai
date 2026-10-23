@@ -14,6 +14,8 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from app.core.config import get_settings
 from app.db.base import Base
+import app.db.auth_models  # noqa: F401  (register auth tables)
+import app.proposals.entities  # noqa: F401  (register domain tables)
 
 # this is the Alembic Config object, which provides access to the values within the .ini file in use.
 config = context.config
@@ -34,6 +36,7 @@ def run_migrations_offline() -> None:
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
+        compare_type=True,
         dialect_opts={"paramstyle": "named"},
     )
 
@@ -42,7 +45,7 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection: Connection) -> None:
-    context.configure(connection=connection, target_metadata=target_metadata)
+    context.configure(connection=connection, target_metadata=target_metadata, compare_type=True)
 
     with context.begin_transaction():
         context.run_migrations()

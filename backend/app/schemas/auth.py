@@ -22,6 +22,8 @@ class CurrentPrincipal(BaseSchema):
     tier: str = Field("free", description="Subscription tier: 'free', 'pro', 'power', 'team'")
     permissions: List[str] = Field(default_factory=list, description="Explicit fine-grained permissions")
     is_authenticated: bool = Field(True, description="Always true for authenticated principal")
+    session_id: Optional[str] = Field(None, description="Current login session id (used for logout / revoke-others)")
+    is_verified: bool = Field(False, description="True once the email address has been confirmed")
 
 
 class LoginRequest(BaseSchema):
@@ -53,6 +55,8 @@ class UserPreferences(BaseSchema):
 
     theme: str = Field("obsidian", description="'obsidian' or 'navy'")
     motion: str = Field("full", description="'full' or 'reduced'")
+    default_models: List[str] = Field(default_factory=list, description="Preferred combatant model ids (onboarding)")
+    default_archetype: Optional[str] = Field(None, description="Preferred cognitive lens id (onboarding)")
 
 
 class UserProfileResponse(BaseSchema):
@@ -64,6 +68,9 @@ class UserProfileResponse(BaseSchema):
     role: str = Field(..., description="Account role")
     tier: str = Field(..., description="Current subscription tier")
     avatar: Optional[str] = Field(None, description="Avatar image URL")
+    occupation: Optional[str] = Field(None, description="Role chosen during onboarding")
+    email_verified: bool = Field(False, description="Whether the email has been confirmed")
+    onboarding_completed: bool = Field(False, description="Whether onboarding has been finished")
     preferences: UserPreferences = Field(default_factory=UserPreferences)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -85,3 +92,35 @@ class ResetPasswordRequest(BaseSchema):
 
     token: str = Field(..., description="One-time password reset token")
     newPassword: str = Field(..., min_length=8, max_length=128, description="New secure password")
+
+
+class ChangePasswordRequest(BaseSchema):
+    """Authenticated password change."""
+
+    currentPassword: str = Field(..., min_length=1, max_length=128)
+    newPassword: str = Field(..., min_length=8, max_length=128)
+
+
+class SessionInfo(BaseSchema):
+    """An active login session shown in Settings > Security."""
+
+    id: str
+    user_agent: Optional[str] = None
+    ip_address: Optional[str] = None
+    created_at: datetime
+    last_used_at: datetime
+    is_current: bool = False
+
+
+class DeleteAccountRequest(BaseSchema):
+    """Account deletion requires re-entering the password."""
+
+    password: str = Field(..., min_length=1, max_length=128)
+
+
+class OnboardingRequest(BaseSchema):
+    """Onboarding answers: role, combatant models, cognitive lens."""
+
+    occupation: Optional[str] = Field(None, max_length=64)
+    models: List[str] = Field(default_factory=list, max_length=6)
+    archetype: Optional[str] = Field(None, max_length=64)
