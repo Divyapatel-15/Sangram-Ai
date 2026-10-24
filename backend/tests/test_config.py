@@ -95,7 +95,26 @@ def test_valid_production_configuration_passes():
         SECRET_KEY="a-very-strong-and-cryptographically-secure-production-key-2026",
         ALLOWED_ORIGINS=["https://sangram.ai", "https://app.sangram.ai"],
         DATABASE_URL="postgresql+asyncpg://prod_user:strong_password@db.prod.internal:5432/sangram",
+        COOKIE_SECURE=True,
+        EMAIL_BACKEND="smtp",
     )
     assert settings.ENVIRONMENT == "production"
     assert settings.DEBUG is False
     assert len(settings.ALLOWED_ORIGINS) == 2
+
+
+def test_production_requires_secure_cookies_and_real_email():
+    """Insecure auth cookies or the console email backend are rejected in production."""
+    base = dict(
+        ENVIRONMENT="production",
+        DEBUG=False,
+        SECRET_KEY="a-very-strong-and-cryptographically-secure-production-key-2026",
+        ALLOWED_ORIGINS=["https://sangram.ai"],
+        DATABASE_URL="postgresql+asyncpg://prod_user:strong_password@db.prod.internal:5432/sangram",
+    )
+    with pytest.raises(ValueError) as exc:
+        Settings(**base, COOKIE_SECURE=False, EMAIL_BACKEND="smtp")
+    assert "COOKIE_SECURE" in str(exc.value)
+    with pytest.raises(ValueError) as exc:
+        Settings(**base, COOKIE_SECURE=True, EMAIL_BACKEND="console")
+    assert "EMAIL_BACKEND" in str(exc.value)

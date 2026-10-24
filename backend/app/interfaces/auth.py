@@ -4,11 +4,13 @@ Defines the typed protocol Developer 2 must implement for user authentication,
 sessions, and profile persistence.
 """
 
-from typing import Optional, Protocol, runtime_checkable
+from typing import List, Optional, Protocol, runtime_checkable
 from app.schemas.auth import (
     CurrentPrincipal,
     LoginRequest,
+    OnboardingRequest,
     RegisterRequest,
+    SessionInfo,
     TokenResponse,
     UserPreferences,
     UserProfileResponse,
@@ -19,7 +21,12 @@ from app.schemas.auth import (
 class IAuthService(Protocol):
     """Contract for user identity, JWT issuing, password management, and email verification."""
 
-    async def authenticate(self, credentials: LoginRequest) -> TokenResponse:
+    async def authenticate(
+        self,
+        credentials: LoginRequest,
+        user_agent: Optional[str] = None,
+        ip_address: Optional[str] = None,
+    ) -> TokenResponse:
         """Validates credentials and returns signed JWT access + refresh tokens.
         
         Raises:
@@ -52,6 +59,46 @@ class IAuthService(Protocol):
         """Validates a 6-digit confirmation code and marks user as verified."""
         ...
 
+    async def logout(self, session_id: str) -> None:
+        """Revokes one session; its access and refresh tokens stop working immediately."""
+        ...
+
+    async def resend_verification(self, user_id: str) -> bool:
+        """Sends a fresh 6-digit code (cool-down enforced)."""
+        ...
+
+    async def change_password(
+        self, user_id: str, current_password: str, new_password: str, keep_session_id: Optional[str] = None
+    ) -> bool:
+        """Changes the password and revokes every other session."""
+        ...
+
+    async def request_email_change(self, user_id: str, new_email: str, password: str) -> bool:
+        """Sends a code to the NEW address; the email only changes after confirmation.
+
+        Raises:
+            ValidationError: Wrong password, or new email equals the current one.
+            ConflictError: The new email is already registered.
+        """
+        ...
+
+    async def confirm_email_change(self, user_id: str, code: str, keep_session_id: Optional[str] = None) -> str:
+        """Applies the pending change, marks the email verified, signs out other sessions.
+        Returns the new email."""
+        ...
+
+    async def list_sessions(self, user_id: str, current_session_id: Optional[str] = None) -> List[SessionInfo]:
+        """Lists the user's active sessions."""
+        ...
+
+    async def revoke_session(self, user_id: str, session_id: str) -> bool:
+        """Revokes one of the user's own sessions.
+
+        Raises:
+            NotFoundError: If the session does not exist or belongs to someone else.
+        """
+        ...
+
     async def forgot_password(self, email: str) -> bool:
         """Generates a secure password reset token and dispatches reset instructions."""
         ...
@@ -74,9 +121,13 @@ class IUserService(Protocol):
         ...
 
     async def update_profile(
-        self, user_id: str, name: Optional[str] = None, avatar: Optional[str] = None
+        self,
+        user_id: str,
+        name: Optional[str] = None,
+        avatar: Optional[str] = None,
+        occupation: Optional[str] = None,
     ) -> UserProfileResponse:
-        """Updates user display name or avatar."""
+        """Updates display name, avatar or occupation (role)."""
         ...
 
     async def get_preferences(self, user_id: str) -> UserPreferences:
@@ -87,6 +138,14 @@ class IUserService(Protocol):
         """Persists updated preferences."""
         ...
 
-    async def delete_account(self, user_id: str) -> bool:
-        """Performs soft or hard deletion of user account and cascades owned data."""
+    async def complete_onboarding(self, user_id: str, payload: OnboardingRequest) -> UserProfileResponse:
+        """Stores onboarding answers and marks onboarding as completed."""
+        ...
+
+    async def delete_account(self, user_id: str, password: str) -> bool:
+        """Hard-deletes the account after password confirmation; database cascades remove owned data.
+
+        Raises:
+            ValidationError: If the password is wrong.
+        """
         ...
